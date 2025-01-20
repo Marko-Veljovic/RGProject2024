@@ -10,7 +10,15 @@ namespace app {
 
         void draw_backpack();
 
+        void update_camera();
+
+        void update() override;
+
+        void begin_draw() override;
+
         void draw() override;
+
+        void end_draw() override;
     public:
         std::string_view name() const override {
             return "app::MainController";
