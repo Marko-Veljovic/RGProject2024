@@ -7,8 +7,14 @@ namespace app {
         void initialize() override;
 
         bool loop() override;
+
+        void draw_backpack();
+
+        void draw() override;
     public:
-        std::string_view name() const override { return "app::MainController"; }
+        std::string_view name() const override {
+            return "app::MainController";
+        }
     };
 } // app
 
