@@ -3,6 +3,9 @@
     "models": {
       "backpack": {
         "path": "backpack/backpack.obj"
+      },
+      "corridor": {
+        "path": "hogwarts-corridor/source/FilchCorridor.fbx"
       }
     }
   },

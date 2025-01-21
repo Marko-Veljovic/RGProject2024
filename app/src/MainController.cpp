@@ -35,11 +35,11 @@ namespace app {
         return true;
     }
 
-    void MainController::draw_backpack() {
+    void MainController::draw_corridor() {
         // Model
         auto resource                      = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto graphics                      = engine::core::Controller::get<engine::graphics::GraphicsController>();
-        engine::resources::Model *backpack = resource->model("backpack");
+        engine::resources::Model *corridor = resource->model("corridor");
         // Shader
         engine::resources::Shader *shader = resource->shader("basic");
 
@@ -50,7 +50,7 @@ namespace app {
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
         model = glm::scale(model, glm::vec3(0.3f));
         shader->set_mat4("model", model);
-        backpack->draw(shader);
+        corridor->draw(shader);
     }
 
     void MainController::update_camera() {
@@ -94,7 +94,7 @@ namespace app {
     }
 
     void MainController::draw() {
-        draw_backpack();
+        draw_corridor();
         draw_skybox();
     }
 
