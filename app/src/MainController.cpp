@@ -35,11 +35,11 @@ namespace app {
         return true;
     }
 
-    void MainController::draw_corridor() {
+    void MainController::draw_lighthouse() {
         // Model
         auto resource                      = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto graphics                      = engine::core::Controller::get<engine::graphics::GraphicsController>();
-        engine::resources::Model *corridor = resource->model("corridor");
+        engine::resources::Model *corridor = resource->model("lighthouse");
         // Shader
         engine::resources::Shader *shader = resource->shader("basic");
 
@@ -87,14 +87,14 @@ namespace app {
 
     void MainController::draw_skybox() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto skybox = resources->skybox("mountain_skybox");
+        auto skybox = resources->skybox("sunset_skybox");
         auto shader = resources->shader("skybox");
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         graphics->draw_skybox(shader, skybox);
     }
 
     void MainController::draw() {
-        draw_corridor();
+        draw_lighthouse();
         draw_skybox();
     }
 

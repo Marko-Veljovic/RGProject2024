@@ -9,7 +9,7 @@ namespace app {
 
         bool loop() override;
 
-        void draw_corridor();
+        void draw_lighthouse();
 
         void update_camera();
 

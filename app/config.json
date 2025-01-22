@@ -4,14 +4,14 @@
       "backpack": {
         "path": "backpack/backpack.obj"
       },
-      "corridor": {
-        "path": "hogwarts-corridor/source/FilchCorridor.fbx"
+      "lighthouse": {
+        "path": "lighthouse/lighthouse.obj"
       }
     }
   },
   "window": {
-    "height": 600,
+    "height": 1000,
     "title": "Hello, window!",
-    "width": 800
+    "width": 1800
   }
 }
