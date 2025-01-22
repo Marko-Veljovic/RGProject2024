@@ -8,7 +8,7 @@ namespace app {
         void initialize() override;
 
         bool loop() override;
-        
+
         void draw_lighthouse();
 
         void update_camera();
