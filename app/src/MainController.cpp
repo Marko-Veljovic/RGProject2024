@@ -37,10 +37,9 @@ namespace app {
 
     void MainController::draw_lighthouse() {
         // Model
-        auto resource                      = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto graphics                      = engine::core::Controller::get<engine::graphics::GraphicsController>();
-        engine::resources::Model *corridor = resource->model("lighthouse");
-
+        auto resource                        = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto graphics                        = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        engine::resources::Model *lighthouse = resource->model("lighthouse");
         // Shader
         engine::resources::Shader *shader = resource->shader("basic");
 
@@ -48,10 +47,18 @@ namespace app {
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
-        model = glm::scale(model, glm::vec3(0.3f));
+        model           = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
+        model           = glm::scale(model, glm::vec3(0.3f));
         shader->set_mat4("model", model);
-        corridor->draw(shader);
+
+        // lighting
+        shader->set_vec3("dirLight.direction", glm::vec3(0.57f, -0.15f, 0.8f));
+        shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+        shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+        shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
+        shader->set_vec3("viewPos", graphics->camera()->Position);
+
+        lighthouse->draw(shader);
     }
 
     void MainController::update_camera() {
@@ -62,8 +69,8 @@ namespace app {
 
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-        auto camera = graphics->camera();
-        float dt = platform->dt();
+        auto camera   = graphics->camera();
+        float dt      = platform->dt();
         if (platform->key(engine::platform::KeyId::KEY_W).is_down()) {
             camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
         }
@@ -76,6 +83,9 @@ namespace app {
         if (platform->key(engine::platform::KeyId::KEY_D).is_down()) {
             camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
         }
+
+        auto mouse = platform->mouse();
+        camera->zoom(mouse.scroll);
     }
 
     void MainController::update() {
@@ -88,9 +98,9 @@ namespace app {
 
     void MainController::draw_skybox() {
         auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto skybox = resources->skybox("sunset_skybox");
-        auto shader = resources->shader("skybox");
-        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto skybox    = resources->skybox("sunset_skybox");
+        auto shader    = resources->shader("skybox");
+        auto graphics  = engine::core::Controller::get<engine::graphics::GraphicsController>();
         graphics->draw_skybox(shader, skybox);
     }
 
