@@ -85,7 +85,13 @@ namespace app {
         }
 
         auto mouse = platform->mouse();
-        camera->zoom(mouse.scroll);
+        camera->Zoom += mouse.scroll;
+        if (camera->Zoom < 1.0f)
+            camera->Zoom = 1.0f;
+        if (camera->Zoom > 45.0f)
+            camera->Zoom = 45.0f;
+        graphics->perspective_params().FOV = camera->Zoom;
+        spdlog::info("Camera FOV: {}", camera->Zoom);
     }
 
     void MainController::update() {
