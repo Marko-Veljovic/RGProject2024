@@ -11,6 +11,8 @@ namespace app {
 
     class MainPlatformEventObserver : public engine::platform::PlatformEventObserver {
         void on_mouse_move(engine::platform::MousePosition position) override;
+
+        void on_scroll(engine::platform::MousePosition position) override;
     };
 
     void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
@@ -19,14 +21,18 @@ namespace app {
             auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
             auto camera   = graphics->camera();
             camera->rotate_camera(position.dx, position.dy);
-
-            auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
-            auto mouse    = platform->mouse();
-
-            camera->zoom(mouse.scroll);
-            graphics->perspective_params().FOV = camera->Zoom;
-            spdlog::info("Camera FOV: {}, {}", graphics->perspective_params().FOV, mouse.scroll);
         }
+    }
+
+    void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition position) {
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto camera   = graphics->camera();
+        auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
+        auto mouse    = platform->mouse();
+
+        camera->zoom(mouse.scroll);
+        graphics->perspective_params().FOV = glm::radians(camera->Zoom);
+        spdlog::info("Camera FOV: {}, {}", graphics->perspective_params().FOV, mouse.scroll);
     }
 
     void MainController::initialize() {
