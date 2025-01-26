@@ -16,8 +16,16 @@ namespace app {
     void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
         auto gui_controller = engine::core::Controller::get<GuiController>();
         if (!gui_controller->is_enabled()) {
-            auto camera = engine::core::Controller::get<engine::graphics::GraphicsController>()->camera();
+            auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+            auto camera   = graphics->camera();
             camera->rotate_camera(position.dx, position.dy);
+
+            auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
+            auto mouse    = platform->mouse();
+
+            camera->zoom(mouse.scroll);
+            graphics->perspective_params().FOV = camera->Zoom;
+            spdlog::info("Camera FOV: {}, {}", graphics->perspective_params().FOV, mouse.scroll);
         }
     }
 
@@ -83,15 +91,6 @@ namespace app {
         if (platform->key(engine::platform::KeyId::KEY_D).is_down()) {
             camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
         }
-
-        auto mouse = platform->mouse();
-        camera->Zoom += mouse.scroll;
-        if (camera->Zoom < 1.0f)
-            camera->Zoom = 1.0f;
-        if (camera->Zoom > 45.0f)
-            camera->Zoom = 45.0f;
-        graphics->perspective_params().FOV = camera->Zoom;
-        spdlog::info("Camera FOV: {}", camera->Zoom);
     }
 
     void MainController::update() {
