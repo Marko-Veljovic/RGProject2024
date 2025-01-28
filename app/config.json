@@ -6,6 +6,9 @@
       },
       "lighthouse": {
         "path": "lighthouse/lighthouse.obj"
+      },
+      "cube": {
+        "path": "cube/cube.fbx"
       }
     }
   },

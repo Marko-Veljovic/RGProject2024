@@ -32,7 +32,6 @@ namespace app {
 
         camera->zoom(mouse.scroll);
         graphics->perspective_params().FOV = glm::radians(camera->Zoom);
-        spdlog::info("Camera FOV: {}, {}", graphics->perspective_params().FOV, mouse.scroll);
     }
 
     void MainController::initialize() {
@@ -65,14 +64,48 @@ namespace app {
         model           = glm::scale(model, glm::vec3(0.3f));
         shader->set_mat4("model", model);
 
-        // lighting
+        // directional lighting
         shader->set_vec3("dirLight.direction", glm::vec3(0.57f, -0.15f, 0.8f));
+        // correct dir light
+        /*
         shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
         shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
         shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
+        */
+
+        // DEBUG dir light
+        shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->set_vec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->set_vec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
         shader->set_vec3("viewPos", graphics->camera()->Position);
 
+        // spotlight
+        shader->set_vec3("spotLight.position", glm::vec3(0.0f, 0.0f, 1.0f));
+        shader->set_vec3("spotLight.direction", glm::vec3(0.0f, 0.0f, -1.0f));
+        shader->set_float("spotLight.cutOff", glm::radians(30.0f));
+        shader->set_float("spotLight.outerCutOff", glm::radians(45.0f));
+        shader->set_float("spotLight.constant", 1.0f);
+        shader->set_float("spotLight.linear", 0.009f);
+        shader->set_float("spotLight.quadratic", 0.0032f);
+        shader->set_vec3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
         lighthouse->draw(shader);
+    }
+
+    void MainController::draw_reflector() {
+        auto graphics  = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto shader    = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("lightCube");
+        auto reflector = engine::core::Controller::get<engine::resources::ResourcesController>()->model("cube");
+        shader->use();
+        shader->set_mat4("projection", graphics->projection_matrix());
+        shader->set_mat4("view", graphics->camera()->view_matrix());
+        glm::mat4 model = glm::mat4(1.0f);
+        model           = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f)); // lightCube position
+        model           = glm::scale(model, glm::vec3(0.3f));
+        shader->set_mat4("model", model);
+        reflector->draw(shader);
     }
 
     void MainController::update_camera() {
@@ -117,6 +150,7 @@ namespace app {
 
     void MainController::draw() {
         draw_lighthouse();
+        draw_reflector();
         draw_skybox();
     }
 

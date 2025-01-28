@@ -11,6 +11,8 @@ namespace app {
 
         void draw_lighthouse();
 
+        void draw_reflector();
+
         void update_camera();
 
         void update() override;
