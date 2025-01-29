@@ -80,14 +80,17 @@ namespace app {
         shader->set_vec3("viewPos", graphics->camera()->Position);
 
         // spotlight
-        shader->set_vec3("spotLight.position", glm::vec3(0.0f, 0.0f, 1.0f));
-        shader->set_vec3("spotLight.direction", glm::vec3(0.0f, 0.0f, -1.0f));
-        shader->set_float("spotLight.cutOff", glm::radians(30.0f));
-        shader->set_float("spotLight.outerCutOff", glm::radians(45.0f));
+        auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
+        float time    = platform->frame_time().current;
+
+        shader->set_vec3("spotLight.position", glm::vec3(0.0f, 2.67f, -3.0f));
+        shader->set_vec3("spotLight.direction", glm::vec3(glm::sin(2 * time), 0.0f, glm::cos(2 * time)));
+        shader->set_float("spotLight.cutOff", glm::cos(glm::radians(34.0f)));
+        shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(38.0f)));
         shader->set_float("spotLight.constant", 1.0f);
         shader->set_float("spotLight.linear", 0.009f);
         shader->set_float("spotLight.quadratic", 0.0032f);
-        shader->set_vec3("spotLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->set_vec3("spotLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
         shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
         shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
@@ -102,15 +105,17 @@ namespace app {
         shader->set_mat4("projection", graphics->projection_matrix());
         shader->set_mat4("view", graphics->camera()->view_matrix());
         glm::mat4 model = glm::mat4(1.0f);
-        model           = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f)); // lightCube position
-        model           = glm::scale(model, glm::vec3(0.3f));
+        model           = glm::translate(model, glm::vec3(0.0f, 2.67f, -3.0f)); // lightCube position
+        model           = glm::scale(model, glm::vec3(0.1f));
         shader->set_mat4("model", model);
         reflector->draw(shader);
     }
 
     void MainController::update_camera() {
+        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         auto gui_controller = engine::core::Controller::get<GuiController>();
         if (gui_controller->is_enabled()) {
+            //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             return;
         }
 
