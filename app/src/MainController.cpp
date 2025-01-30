@@ -67,11 +67,9 @@ namespace app {
         // directional lighting
         shader->set_vec3("dirLight.direction", glm::vec3(0.57f, -0.15f, 0.8f));
         // correct dir light
-        /*
-        shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
-        shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
-        */
+        // shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+        // shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+        // shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
 
         // DEBUG dir light
         shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
