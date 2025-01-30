@@ -33,7 +33,7 @@ void main()
     }
 
     // tone mapping
-    vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
+    vec3 result = vec3(1.0) - exp(-hdrColor * 1);
     // gamma correction
     const float gamma = 2.2;
     result = pow(result, vec3(1.0 / gamma));

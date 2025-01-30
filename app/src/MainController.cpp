@@ -1,3 +1,4 @@
+#include <engine/graphics/Framebuffer.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <engine/graphics/OpenGL.hpp>
 #include <engine/platform/PlatformController.hpp>
@@ -141,6 +142,25 @@ namespace app {
 
     void MainController::begin_draw() {
         engine::graphics::OpenGL::clear_buffers();
+
+        // bloom
+        auto platform     = engine::core::Controller::get<engine::platform::PlatformController>();
+        int screen_width  = platform->window()->width();
+        int screen_height = platform->window()->height();
+
+        m_fbo = new Framebuffer(screen_width, screen_height);
+        m_fbo->init();
+
+        auto resources  = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto shaderBlur = resources->shader("blur");
+        shaderBlur->use();
+        shaderBlur->set_int("image", 0);
+
+        auto shaderBloomFinal = resources->shader("bloomFinal");
+        shaderBloomFinal->use();
+        shaderBloomFinal->set_int("scene", 0);
+        shaderBloomFinal->set_int("bloomBlur", 1);
+        shaderBloomFinal->set_bool("bloom", true);
     }
 
     void MainController::draw_skybox() {
@@ -152,9 +172,45 @@ namespace app {
     }
 
     void MainController::draw() {
+        // 1
+        m_fbo->bind(m_fbo->m_hdrFBO);
+        m_fbo->clear();
+
         draw_lighthouse();
         draw_reflector();
         draw_skybox();
+
+        m_fbo->bind(0);
+
+        // 2
+        bool horizontal     = true, first_iteration = true;
+        unsigned int amount = 10;
+        auto resources      = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto shaderBlur     = resources->shader("blur");
+        shaderBlur->use();
+        for (unsigned int i = 0; i < amount; i++) {
+            m_fbo->bind(m_fbo->m_pingpongFBO[horizontal]);
+            shaderBlur->set_int("horizontal", horizontal);
+            m_fbo->bindTexture(first_iteration
+                                   ? m_fbo->m_colorBuffers[1]
+                                   : m_fbo->m_pingpongColorBuffers[!horizontal]);
+            // bind texture of other framebuffer (or scene if first iteration)
+            m_fbo->renderQuad();
+            horizontal = !horizontal;
+            if (first_iteration)
+                first_iteration = false;
+        }
+        m_fbo->bind(0);
+
+        // 3
+        m_fbo->clear();
+        auto shaderBloomFinal = resources->shader("bloomFinal");
+        shaderBloomFinal->use();
+        m_fbo->activeTexture(0);
+        m_fbo->bindTexture(m_fbo->m_colorBuffers[0]);
+        m_fbo->activeTexture(1);
+        m_fbo->bindTexture(m_fbo->m_pingpongColorBuffers[!horizontal]);
+        m_fbo->renderQuad();
     }
 
     void MainController::end_draw() {
