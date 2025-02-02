@@ -1,6 +1,7 @@
 #ifndef MAINCONTROLLER_HPP
 #define MAINCONTROLLER_HPP
 #include <engine/core/Controller.hpp>
+#include <engine/graphics/Framebuffer.hpp>
 
 namespace app {
 
@@ -24,6 +25,8 @@ namespace app {
         void draw() override;
 
         void end_draw() override;
+
+        Framebuffer *m_fbo;
 
     public:
         std::string_view name() const override {
