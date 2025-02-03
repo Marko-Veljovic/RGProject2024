@@ -38,6 +38,13 @@ namespace app {
         auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
         platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
         engine::graphics::OpenGL::enable_depth_testing();
+
+        // configure framebuffers for bloom effect
+        int screen_width  = platform->window()->width();
+        int screen_height = platform->window()->height();
+
+        m_bloom_effect = std::make_unique<BloomEffect>();
+        m_bloom_effect->init(screen_width, screen_height);
     }
 
     bool MainController::loop() {
@@ -152,9 +159,20 @@ namespace app {
     }
 
     void MainController::draw() {
+        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto screen_shader = resources->shader("tmp");
+        screen_shader->use();
+        screen_shader->set_int("screenTexture", 0);
+
+        m_bloom_effect->begin_render();
+
         draw_lighthouse();
         draw_reflector();
         draw_skybox();
+
+        m_bloom_effect->end_render();
+
+        m_bloom_effect->render_quad();
     }
 
     void MainController::end_draw() {

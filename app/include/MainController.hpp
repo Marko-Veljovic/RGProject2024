@@ -1,10 +1,13 @@
 #ifndef MAINCONTROLLER_HPP
 #define MAINCONTROLLER_HPP
 #include <engine/core/Controller.hpp>
+#include <engine/graphics/BloomEffect.hpp>
 
 namespace app {
 
     class MainController : public engine::core::Controller {
+        std::unique_ptr<BloomEffect> m_bloom_effect;
+
         void initialize() override;
 
         bool loop() override;
