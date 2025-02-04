@@ -40,11 +40,17 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
 
 void BloomEffect::begin_render() {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
+    // glEnable(GL_DEPTH_TEST);
+    // glClearColor(0.0f, 1.0f, 0.1f, 1.0f);
     CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void BloomEffect::end_render() {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+    // glDisable(GL_DEPTH_TEST);
+    // glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+    // glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void BloomEffect::render_quad() {

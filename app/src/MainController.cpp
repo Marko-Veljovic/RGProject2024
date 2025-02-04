@@ -45,6 +45,11 @@ namespace app {
 
         m_bloom_effect = std::make_unique<BloomEffect>();
         m_bloom_effect->init(screen_width, screen_height);
+
+        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto screen_shader = resources->shader("tmp");
+        screen_shader->use();
+        screen_shader->set_int("screenTexture", 0);
     }
 
     bool MainController::loop() {
@@ -159,10 +164,6 @@ namespace app {
     }
 
     void MainController::draw() {
-        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto screen_shader = resources->shader("tmp");
-        screen_shader->use();
-        screen_shader->set_int("screenTexture", 0);
 
         m_bloom_effect->begin_render();
 
@@ -171,6 +172,10 @@ namespace app {
         draw_skybox();
 
         m_bloom_effect->end_render();
+
+        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto screen_shader = resources->shader("tmp");
+        screen_shader->use();
 
         m_bloom_effect->render_quad();
     }
