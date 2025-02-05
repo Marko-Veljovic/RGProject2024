@@ -25,9 +25,7 @@ public:
 
     void clear_color_depth_buffers();
 
-    void temporary_function();
-
-    void finalize();
+    void finalize(bool horizontal);
 
     void render_quad();
 };

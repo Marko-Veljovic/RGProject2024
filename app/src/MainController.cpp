@@ -54,6 +54,13 @@ namespace app {
         auto blur_shader = resources->shader("blur");
         blur_shader->use();
         blur_shader->set_int("image", 0);
+
+        auto bloom_shader = resources->shader("bloomFinal");
+        bloom_shader->use();
+        bloom_shader->set_int("scene", 0);
+        bloom_shader->set_int("bloomBlur", 1);
+        bloom_shader->set_float("exposure", 1.0);
+        bloom_shader->set_bool("bloom", false);
     }
 
     bool MainController::loop() {
@@ -83,14 +90,14 @@ namespace app {
         // directional lighting
         shader->set_vec3("dirLight.direction", glm::vec3(0.57f, -0.15f, 0.8f));
         // correct dir light
-        shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
-        shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
+        // shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+        // shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+        // shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
 
         // DEBUG dir light
-        // shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-        // shader->set_vec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
-        // shader->set_vec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->set_vec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
+        shader->set_vec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
 
         shader->set_vec3("viewPos", graphics->camera()->Position);
 
@@ -172,6 +179,7 @@ namespace app {
         auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
         auto screen_shader = resources->shader("tmp");
         auto blur_shader   = resources->shader("blur");
+        auto bloom_shader  = resources->shader("bloomFinal");
 
         // 1. render scene into floating point framebuffer
         m_bloom_effect->bind_hdr_fbo();
@@ -196,10 +204,11 @@ namespace app {
                 first_iteration = false;
         }
         m_bloom_effect->bind_default_fbo();
-        m_bloom_effect->clear_color_depth_buffers();
 
-        screen_shader->use();
-        m_bloom_effect->temporary_function();
+        // 3. now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's color range
+        m_bloom_effect->clear_color_depth_buffers();
+        bloom_shader->use();
+        m_bloom_effect->finalize(horizontal);
 
         m_bloom_effect->render_quad();
     }
