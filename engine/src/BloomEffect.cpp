@@ -6,6 +6,7 @@
 #include <spdlog/spdlog.h>
 
 void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
+    // hdr_FBO
     CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_FBO);
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
 
@@ -35,22 +36,54 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 
+    // ping_pong_FBO
+    CHECKED_GL_CALL(glGenFramebuffers, 2, m_ping_pong_FBO);
+    CHECKED_GL_CALL(glGenTextures, 2, m_ping_pong_color_buffers);
+    for (unsigned int i = 0; i < 2; i++) {
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[i]);
+        CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[i]);
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT,
+                        nullptr);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                        m_ping_pong_color_buffers[i], 0);
+
+        if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+    }
+
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
-void BloomEffect::begin_render() {
+void BloomEffect::bind_hdr_fbo() {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
-    // glEnable(GL_DEPTH_TEST);
-    // glClearColor(0.0f, 1.0f, 0.1f, 1.0f);
     CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void BloomEffect::end_render() {
+void BloomEffect::bind_ping_pong_fbo(bool horizontal) {
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[horizontal]);
+}
+
+void BloomEffect::bind_ping_pong_texture(bool first_iteration, bool horizontal) {
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D,
+                    first_iteration ? m_color_buffers[1] : m_ping_pong_color_buffers[!horizontal]);
+}
+
+void BloomEffect::bind_default_fbo() {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
-    // glDisable(GL_DEPTH_TEST);
-    // glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-    // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
-    // glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void BloomEffect::clear_color_depth_buffers() {
+    CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void BloomEffect::temporary_function() {
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[1]);
 }
 
 void BloomEffect::render_quad() {
@@ -74,9 +107,6 @@ void BloomEffect::render_quad() {
         CHECKED_GL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                         (void *) (3 * sizeof(float)));
     }
-
-    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
-    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[0]);
 
     CHECKED_GL_CALL(glBindVertexArray, m_quad_VAO);
     CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
