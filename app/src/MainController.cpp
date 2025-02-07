@@ -39,17 +39,14 @@ namespace app {
         platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
         engine::graphics::OpenGL::enable_depth_testing();
 
-        // configure framebuffers for bloom effect
+        // bloom effect
         int screen_width  = platform->window()->width();
         int screen_height = platform->window()->height();
 
         m_bloom_effect = std::make_unique<BloomEffect>();
         m_bloom_effect->init(screen_width, screen_height);
 
-        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto screen_shader = resources->shader("tmp");
-        screen_shader->use();
-        screen_shader->set_int("screenTexture", 0);
+        auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
 
         auto blur_shader = resources->shader("blur");
         blur_shader->use();
@@ -59,8 +56,9 @@ namespace app {
         bloom_shader->use();
         bloom_shader->set_int("scene", 0);
         bloom_shader->set_int("bloomBlur", 1);
-        bloom_shader->set_float("exposure", 1.0);
-        bloom_shader->set_bool("bloom", false);
+        // exposure: higher -> darker pixels get more details, lower -> brighter pixels get more details
+        bloom_shader->set_float("exposure", 0.1);
+        bloom_shader->set_bool("bloom", true);
     }
 
     bool MainController::loop() {
@@ -87,7 +85,7 @@ namespace app {
         model           = glm::scale(model, glm::vec3(0.3f));
         shader->set_mat4("model", model);
 
-        // directional lighting
+        // directional light
         shader->set_vec3("dirLight.direction", glm::vec3(0.57f, -0.15f, 0.8f));
         // correct dir light
         // shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
@@ -176,10 +174,9 @@ namespace app {
     }
 
     void MainController::draw() {
-        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto screen_shader = resources->shader("tmp");
-        auto blur_shader   = resources->shader("blur");
-        auto bloom_shader  = resources->shader("bloomFinal");
+        auto resources    = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto blur_shader  = resources->shader("blur");
+        auto bloom_shader = resources->shader("bloomFinal");
 
         // 1. render scene into floating point framebuffer
         m_bloom_effect->bind_hdr_fbo();
@@ -196,7 +193,7 @@ namespace app {
         blur_shader->use();
         for (unsigned int i = 0; i < amount; i++) {
             m_bloom_effect->bind_ping_pong_fbo(horizontal);
-            blur_shader->set_int("horizontal", horizontal);
+            blur_shader->set_bool("horizontal", horizontal);
             m_bloom_effect->bind_ping_pong_texture(first_iteration, horizontal);
             m_bloom_effect->render_quad();
             horizontal = !horizontal;
