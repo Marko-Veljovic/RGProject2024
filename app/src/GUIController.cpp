@@ -2,6 +2,7 @@
 #include <engine/platform/PlatformController.hpp>
 
 #include <GUIController.hpp>
+#include <ProgramStateController.hpp>
 #include <imgui.h>
 
 namespace app {
@@ -18,15 +19,22 @@ namespace app {
     }
 
     void GuiController::draw() {
-        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-        auto camera = graphics->camera();
+        auto graphics      = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto program_state = engine::core::Controller::get<ProgramStateController>();
+        auto camera        = graphics->camera();
         graphics->begin_gui();
 
         ImGui::Begin("Camera info");
         ImGui::Text("Camera position: (%f, %f, %f)", camera->Position.x, camera->Position.y, camera->Position.z);
+        ImGui::DragFloat("Exposure", &program_state->m_exposure, 0.01, 0.0, 1.0);
+        ImGui::Checkbox("Bloom:", &program_state->m_bloom_enabled);
         ImGui::End();
 
         graphics->end_gui();
+    }
+
+    void GuiController::terminate() {
+
     }
 
 } // app

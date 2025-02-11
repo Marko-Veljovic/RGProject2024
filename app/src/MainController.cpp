@@ -5,6 +5,7 @@
 
 #include <GUIController.hpp>
 #include <MainController.hpp>
+#include <ProgramStateController.hpp>
 #include <spdlog/spdlog.h>
 
 namespace app {
@@ -56,9 +57,6 @@ namespace app {
         bloom_shader->use();
         bloom_shader->set_int("scene", 0);
         bloom_shader->set_int("bloomBlur", 1);
-        // exposure: higher -> darker pixels get more details, lower -> brighter pixels get more details
-        bloom_shader->set_float("exposure", 0.1);
-        bloom_shader->set_bool("bloom", true);
     }
 
     bool MainController::loop() {
@@ -174,9 +172,10 @@ namespace app {
     }
 
     void MainController::draw() {
-        auto resources    = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto blur_shader  = resources->shader("blur");
-        auto bloom_shader = resources->shader("bloomFinal");
+        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto program_state = engine::core::Controller::get<ProgramStateController>();
+        auto blur_shader   = resources->shader("blur");
+        auto bloom_shader  = resources->shader("bloomFinal");
 
         // 1. render scene into floating point framebuffer
         m_bloom_effect->bind_hdr_fbo();
@@ -206,6 +205,10 @@ namespace app {
         m_bloom_effect->clear_color_depth_buffers();
         bloom_shader->use();
         m_bloom_effect->finalize(horizontal);
+
+        // exposure: higher -> darker pixels get more details, lower -> brighter pixels get more details
+        bloom_shader->set_float("exposure", program_state->m_exposure);
+        bloom_shader->set_bool("bloom", program_state->m_bloom_enabled);
 
         m_bloom_effect->render_quad();
     }
