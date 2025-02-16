@@ -57,6 +57,12 @@ namespace app {
         bloom_shader->use();
         bloom_shader->set_int("scene", 0);
         bloom_shader->set_int("bloomBlur", 1);
+
+        bloom_shader->set_int("coefficients.num_samples", 256);
+        bloom_shader->set_float("coefficients.density", 1.0f);
+        bloom_shader->set_float("coefficients.exposure", 1.0f);
+        bloom_shader->set_float("coefficients.decay", 1.0f);
+        bloom_shader->set_float("coefficients.weight", 0.05f);
     }
 
     bool MainController::loop() {
@@ -108,24 +114,38 @@ namespace app {
         shader->set_float("spotLight.constant", 1.0f);
         shader->set_float("spotLight.linear", 0.009f);
         shader->set_float("spotLight.quadratic", 0.0032f);
-        shader->set_vec3("spotLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        shader->set_vec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
-        shader->set_vec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader->set_vec3("spotLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+        shader->set_vec3("spotLight.diffuse", glm::vec3(10.0f, 10.0f, 10.0f));
+        shader->set_vec3("spotLight.specular", glm::vec3(10.0f, 10.0f, 10.0f));
 
         lighthouse->draw(shader);
     }
 
     void MainController::draw_reflector() {
-        auto graphics  = engine::core::Controller::get<engine::graphics::GraphicsController>();
-        auto shader    = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("lightCube");
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto shader = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("lightCube");
+        auto bloom_shader = engine::core::Controller::get<engine::resources::ResourcesController>()->
+                shader("bloomFinal");
         auto reflector = engine::core::Controller::get<engine::resources::ResourcesController>()->model("cube");
         shader->use();
-        shader->set_mat4("projection", graphics->projection_matrix());
-        shader->set_mat4("view", graphics->camera()->view_matrix());
-        glm::mat4 model = glm::mat4(1.0f);
-        model           = glm::translate(model, glm::vec3(0.0f, 2.67f, -3.0f)); // lightCube position
-        model           = glm::scale(model, glm::vec3(0.1f));
+
+        glm::mat4 model      = glm::mat4(1.0f);
+        model                = glm::translate(model, glm::vec3(0.0f, 2.67f, -3.0f)); // lightCube position
+        model                = glm::scale(model, glm::vec3(0.1f));
+        glm::mat4 projection = graphics->projection_matrix();
+        glm::mat4 view       = graphics->camera()->view_matrix();
+
+        glm::vec4 clip_space   = projection * view * model * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        glm::vec4 ndc_space    = clip_space / clip_space.w;
+        glm::vec4 screen_space = (ndc_space + 1.0f) * 0.5f;
+
+        shader->set_mat4("projection", projection);
+        shader->set_mat4("view", view);
         shader->set_mat4("model", model);
+
+        bloom_shader->use();
+        bloom_shader->set_vec4("screen_space_light_position", screen_space);
+
         reflector->draw(shader);
     }
 
