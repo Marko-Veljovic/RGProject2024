@@ -58,11 +58,20 @@ namespace app {
         bloom_shader->set_int("scene", 0);
         bloom_shader->set_int("bloomBlur", 1);
 
-        bloom_shader->set_int("coefficients.num_samples", 256);
-        bloom_shader->set_float("coefficients.density", 1.0f);
-        bloom_shader->set_float("coefficients.exposure", 1.0f);
-        bloom_shader->set_float("coefficients.decay", 1.0f);
-        bloom_shader->set_float("coefficients.weight", 0.05f);
+        // volumetric light
+        m_volumetric_light = std::make_unique<VolumetricLight>();
+        m_volumetric_light->init(screen_width, screen_height);
+
+        auto volumetric_light_shader = resources->shader("volumetricLight");
+        volumetric_light_shader->use();
+
+        volumetric_light_shader->set_int("scene", 0);
+        volumetric_light_shader->set_int("bloomBlur", 1);
+        volumetric_light_shader->set_int("coefficients.num_samples", 256);
+        volumetric_light_shader->set_float("coefficients.density", 1.0f);
+        volumetric_light_shader->set_float("coefficients.exposure", 1.0f);
+        volumetric_light_shader->set_float("coefficients.decay", 1.0f);
+        volumetric_light_shader->set_float("coefficients.weight", 0.05f);
     }
 
     bool MainController::loop() {
@@ -124,8 +133,8 @@ namespace app {
     void MainController::draw_reflector() {
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         auto shader = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("lightCube");
-        auto bloom_shader = engine::core::Controller::get<engine::resources::ResourcesController>()->
-                shader("bloomFinal");
+        auto volumetric_light_shader = engine::core::Controller::get<engine::resources::ResourcesController>()->
+                shader("volumetricLight");
         auto reflector = engine::core::Controller::get<engine::resources::ResourcesController>()->model("cube");
         shader->use();
 
@@ -143,8 +152,8 @@ namespace app {
         shader->set_mat4("view", view);
         shader->set_mat4("model", model);
 
-        bloom_shader->use();
-        bloom_shader->set_vec4("screen_space_light_position", screen_space);
+        volumetric_light_shader->use();
+        volumetric_light_shader->set_vec4("screen_space_light_position", screen_space);
 
         reflector->draw(shader);
     }
@@ -192,10 +201,11 @@ namespace app {
     }
 
     void MainController::draw() {
-        auto resources     = engine::core::Controller::get<engine::resources::ResourcesController>();
-        auto program_state = engine::core::Controller::get<ProgramStateController>();
-        auto blur_shader   = resources->shader("blur");
-        auto bloom_shader  = resources->shader("bloomFinal");
+        auto resources               = engine::core::Controller::get<engine::resources::ResourcesController>();
+        auto program_state           = engine::core::Controller::get<ProgramStateController>();
+        auto blur_shader             = resources->shader("blur");
+        auto bloom_shader            = resources->shader("bloomFinal");
+        auto volumetric_light_shader = resources->shader("volumetricLight");
 
         // 1. render scene into floating point framebuffer
         m_bloom_effect->bind_hdr_fbo();
@@ -219,9 +229,9 @@ namespace app {
             if (first_iteration)
                 first_iteration = false;
         }
-        m_bloom_effect->bind_default_fbo();
 
-        // 3. now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's color range
+        // 3. now render floating point color buffer to 2D quad and tonemap HDR colors to volumetric light fbo
+        m_volumetric_light->bind_hdr_fbo();
         m_bloom_effect->clear_color_depth_buffers();
         bloom_shader->use();
         m_bloom_effect->finalize(horizontal);
@@ -229,6 +239,16 @@ namespace app {
         // exposure: higher -> darker pixels get more details, lower -> brighter pixels get more details
         bloom_shader->set_float("exposure", program_state->m_exposure);
         bloom_shader->set_bool("bloom", program_state->m_bloom_enabled);
+
+        m_bloom_effect->render_quad();
+
+        // Volumetric light
+        m_bloom_effect->bind_default_fbo();
+        m_bloom_effect->clear_color_depth_buffers();
+        volumetric_light_shader->use();
+        volumetric_light_shader->set_float("exposure", program_state->m_exposure);
+        m_volumetric_light->finalize();
+        m_bloom_effect->active_dark(horizontal);
 
         m_bloom_effect->render_quad();
     }

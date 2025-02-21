@@ -2,11 +2,13 @@
 #define MAINCONTROLLER_HPP
 #include <engine/core/Controller.hpp>
 #include <engine/graphics/BloomEffect.hpp>
+#include <engine/graphics/VolumetricLight.hpp>
 
 namespace app {
 
     class MainController : public engine::core::Controller {
         std::unique_ptr<BloomEffect> m_bloom_effect;
+        std::unique_ptr<VolumetricLight> m_volumetric_light;
 
         void initialize() override;
 

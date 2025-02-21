@@ -88,6 +88,11 @@ void BloomEffect::finalize(bool horizontal) {
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[!horizontal]);
 }
 
+void BloomEffect::active_dark(bool horizontal) {
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[!horizontal]);
+}
+
 void BloomEffect::render_quad() {
     if (m_quad_VAO == 0) {
         float quad_vertices[] = {
