@@ -33,8 +33,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     unsigned int attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     CHECKED_GL_CALL(glDrawBuffers, 2, attachments);
 
-    if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+    if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 
     // ping_pong_FBO
     CHECKED_GL_CALL(glGenFramebuffers, 2, m_ping_pong_FBO);
@@ -52,8 +51,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
         CHECKED_GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                         m_ping_pong_color_buffers[i], 0);
 
-        if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
+        if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
     }
 
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
@@ -64,22 +62,16 @@ void BloomEffect::bind_hdr_fbo() {
     CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void BloomEffect::bind_ping_pong_fbo(bool horizontal) {
-    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[horizontal]);
-}
+void BloomEffect::bind_ping_pong_fbo(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[horizontal]); }
 
 void BloomEffect::bind_ping_pong_texture(bool first_iteration, bool horizontal) {
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D,
                     first_iteration ? m_color_buffers[1] : m_ping_pong_color_buffers[!horizontal]);
 }
 
-void BloomEffect::bind_default_fbo() {
-    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
-}
+void BloomEffect::bind_default_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0); }
 
-void BloomEffect::clear_color_depth_buffers() {
-    CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
+void BloomEffect::clear_color_depth_buffers() { CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
 void BloomEffect::finalize(bool horizontal) {
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
@@ -89,7 +81,7 @@ void BloomEffect::finalize(bool horizontal) {
 }
 
 void BloomEffect::active_dark(bool horizontal) {
-    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[!horizontal]);
 }
 
