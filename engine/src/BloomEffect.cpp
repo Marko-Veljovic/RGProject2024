@@ -10,8 +10,8 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_FBO);
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
 
-    CHECKED_GL_CALL(glGenTextures, 2, m_color_buffers);
-    for (unsigned int i = 0; i < 2; i++) {
+    CHECKED_GL_CALL(glGenTextures, 3, m_color_buffers);
+    for (unsigned int i = 0; i < 3; i++) {
         CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[i]);
         CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT,
                         nullptr);
@@ -30,8 +30,8 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
     CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_depth);
 
-    unsigned int attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-    CHECKED_GL_CALL(glDrawBuffers, 2, attachments);
+    unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    CHECKED_GL_CALL(glDrawBuffers, 3, attachments);
 
     if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 
@@ -81,8 +81,8 @@ void BloomEffect::finalize(bool horizontal) {
 }
 
 void BloomEffect::active_dark(bool horizontal) {
-    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
-    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[!horizontal]);
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[2]);
 }
 
 void BloomEffect::render_quad() {

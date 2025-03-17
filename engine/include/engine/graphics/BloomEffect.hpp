@@ -4,7 +4,7 @@
 class BloomEffect {
 private:
     unsigned int m_hdr_FBO;
-    unsigned int m_color_buffers[2];
+    unsigned int m_color_buffers[3];
 
     unsigned int m_ping_pong_FBO[2];
     unsigned int m_ping_pong_color_buffers[2];

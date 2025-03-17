@@ -72,10 +72,6 @@ void MainController::initialize() {
     volumetric_light_shader->set_float("coefficients.exposure", 1.0f);
     volumetric_light_shader->set_float("coefficients.decay", 1.0f);
     volumetric_light_shader->set_float("coefficients.weight", 0.05f);
-
-    m_volumetric_light->enable_stencil_test();
-    m_volumetric_light->stencil_func_not_equal();
-    m_volumetric_light->stencil_op();
 }
 
 bool MainController::loop() {
@@ -198,18 +194,11 @@ void MainController::draw() {
     auto volumetric_light_shader = resources->shader("volumetricLight");
     auto tmp_shader = resources->shader("tmp");
 
-    m_volumetric_light->clear_stencil_buffer();
-
     // 1. render scene into floating point framebuffer
     m_bloom_effect->bind_hdr_fbo();
-
-    m_volumetric_light->stencil_mask(0x00);
     draw_lighthouse();
     draw_reflector();
-    m_volumetric_light->stencil_func_always(1);
-    m_volumetric_light->stencil_mask(0xFF);
     draw_skybox();
-    m_volumetric_light->stencil_mask(0x00);
 
     m_bloom_effect->bind_default_fbo();
 
@@ -233,23 +222,12 @@ void MainController::draw() {
     m_bloom_effect->finalize(horizontal);
 
     // exposure: higher -> darker pixels get more details, lower -> brighter pixels get more details
-    bloom_shader->set_float("exposure", program_state->m_exposure);
     bloom_shader->set_bool("bloom", program_state->m_bloom_enabled);
 
     m_bloom_effect->render_quad();
 
     // Volumetric light
 
-    m_volumetric_light->stencil_func_not_equal();
-    m_volumetric_light->disable_depth_test();
-    m_volumetric_light->bind_dark_fbo();
-    m_bloom_effect->clear_color_depth_buffers();
-    tmp_shader->use();
-    m_bloom_effect->active_dark(horizontal);
-
-    m_bloom_effect->render_quad();
-    m_volumetric_light->stencil_func_always(1);
-    m_volumetric_light->enable_depth_test();
 
     // end of dark color buffer set up
 
@@ -258,6 +236,7 @@ void MainController::draw() {
     volumetric_light_shader->use();
     volumetric_light_shader->set_float("exposure", program_state->m_exposure);
     m_volumetric_light->finalize();
+    m_bloom_effect->active_dark(horizontal);
 
     m_bloom_effect->render_quad();
 }
