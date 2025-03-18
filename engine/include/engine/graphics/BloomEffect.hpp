@@ -31,7 +31,7 @@ public:
 
     void finalize(bool horizontal);
 
-    void active_dark(bool horizontal);
+    void active_volumetric_texture(bool horizontal);
 
     void render_quad();
 };

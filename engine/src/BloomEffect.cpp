@@ -2,7 +2,6 @@
 #include <glad/glad.h>
 #include <engine/graphics/OpenGL.hpp>
 
-#include <iostream>
 #include <spdlog/spdlog.h>
 
 void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
@@ -10,6 +9,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_FBO);
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
 
+    // 3 color buffers for: 1) scene, 2) bright fragments only, 3) lighthouse light only
     CHECKED_GL_CALL(glGenTextures, 3, m_color_buffers);
     for (unsigned int i = 0; i < 3; i++) {
         CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[i]);
@@ -35,7 +35,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
 
     if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 
-    // ping_pong_FBO
+    // 4 ping_pong_FBOs for blurring, 2 for blurring bright color buffer (bloom effect) and 2 for blurring lighthouse light (volumetric light)
     CHECKED_GL_CALL(glGenFramebuffers, 4, m_ping_pong_FBO);
     CHECKED_GL_CALL(glGenTextures, 4, m_ping_pong_color_buffers);
     for (unsigned int i = 0; i < 4; i++) {
@@ -57,10 +57,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
-void BloomEffect::bind_hdr_fbo() {
-    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
-    CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
+void BloomEffect::bind_hdr_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO); }
 
 void BloomEffect::bind_ping_pong_fbo(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[horizontal]); }
 
@@ -87,7 +84,7 @@ void BloomEffect::finalize(bool horizontal) {
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[!horizontal]);
 }
 
-void BloomEffect::active_dark(bool horizontal) {
+void BloomEffect::active_volumetric_texture(bool horizontal) {
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[2 + !horizontal]);
 }

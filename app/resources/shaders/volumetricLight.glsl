@@ -29,7 +29,7 @@ struct PostprocessingCoefficients
 };
 
 uniform sampler2D scene;
-uniform sampler2D bloomBlur;
+uniform sampler2D blurredLight;
 uniform float exposure;
 uniform vec4 screen_space_light_position;
 uniform PostprocessingCoefficients coefficients;
@@ -56,12 +56,12 @@ vec3 radial_blur(PostprocessingCoefficients coefficients, vec2 screen_space_posi
 {
     vec2 delta_tex_coord = (TexCoords - screen_space_position) * coefficients.density * (1.0 / float(coefficients.num_samples));
     vec2 tex_coordinates = TexCoords;
-    vec3 color = texture(bloomBlur, tex_coordinates).rgb;
+    vec3 color = texture(blurredLight, tex_coordinates).rgb;
     float decay = 1.0;
     for (int i = 0; i < coefficients.num_samples; ++i)
     {
         tex_coordinates -= delta_tex_coord;
-        vec3 current_sample = texture(bloomBlur, tex_coordinates).rgb;
+        vec3 current_sample = texture(blurredLight, tex_coordinates).rgb;
         current_sample *= decay * coefficients.weight;
         color += current_sample;
         decay *= coefficients.decay;
