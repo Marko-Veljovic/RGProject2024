@@ -207,10 +207,17 @@ void MainController::draw() {
     unsigned int amount = 10;
     blur_shader->use();
     for (unsigned int i = 0; i < amount; i++) {
+        // for bloom
         m_bloom_effect->bind_ping_pong_fbo(horizontal);
         blur_shader->set_bool("horizontal", horizontal);
         m_bloom_effect->bind_ping_pong_texture(first_iteration, horizontal);
         m_bloom_effect->render_quad();
+        // for volumetric
+        m_bloom_effect->bind_ping_pong_fbo2(horizontal);
+        blur_shader->set_bool("horizontal", horizontal);
+        m_bloom_effect->bind_ping_pong_texture2(first_iteration, horizontal);
+        m_bloom_effect->render_quad();
+        // end
         horizontal = !horizontal;
         if (first_iteration) first_iteration = false;
     }

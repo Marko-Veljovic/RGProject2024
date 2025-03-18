@@ -36,9 +36,9 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 
     // ping_pong_FBO
-    CHECKED_GL_CALL(glGenFramebuffers, 2, m_ping_pong_FBO);
-    CHECKED_GL_CALL(glGenTextures, 2, m_ping_pong_color_buffers);
-    for (unsigned int i = 0; i < 2; i++) {
+    CHECKED_GL_CALL(glGenFramebuffers, 4, m_ping_pong_FBO);
+    CHECKED_GL_CALL(glGenTextures, 4, m_ping_pong_color_buffers);
+    for (unsigned int i = 0; i < 4; i++) {
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[i]);
         CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[i]);
         CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT,
@@ -64,9 +64,16 @@ void BloomEffect::bind_hdr_fbo() {
 
 void BloomEffect::bind_ping_pong_fbo(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[horizontal]); }
 
+void BloomEffect::bind_ping_pong_fbo2(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[2 + horizontal]); }
+
 void BloomEffect::bind_ping_pong_texture(bool first_iteration, bool horizontal) {
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D,
                     first_iteration ? m_color_buffers[1] : m_ping_pong_color_buffers[!horizontal]);
+}
+
+void BloomEffect::bind_ping_pong_texture2(bool first_iteration, bool horizontal) {
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D,
+                    first_iteration ? m_color_buffers[2] : m_ping_pong_color_buffers[2 + !horizontal]);
 }
 
 void BloomEffect::bind_default_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0); }
@@ -82,7 +89,7 @@ void BloomEffect::finalize(bool horizontal) {
 
 void BloomEffect::active_dark(bool horizontal) {
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
-    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[2]);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[2 + !horizontal]);
 }
 
 void BloomEffect::render_quad() {
