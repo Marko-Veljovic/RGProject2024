@@ -22,7 +22,6 @@ in vec2 TexCoords;
 uniform sampler2D scene;
 uniform sampler2D bloomBlur;
 uniform bool bloom;
-uniform float exposure;
 
 void main()
 {
@@ -32,11 +31,5 @@ void main()
         hdrColor += bloomColor;
     }
 
-    // tone mapping
-    vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
-    // gamma correction
-    const float gamma = 2.2;
-    result = pow(result, vec3(1.0 / gamma));
-
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(hdrColor, 1.0);
 }
