@@ -39,6 +39,4 @@ void VolumetricLight::clear_color_depth_buffers() { CHECKED_GL_CALL(glClear, GL_
 void VolumetricLight::finalize() {
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffer);
-    // CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
-    // CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_dark_color_buffer);
 }

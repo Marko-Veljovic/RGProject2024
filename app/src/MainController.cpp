@@ -156,6 +156,28 @@ void MainController::draw_reflector() {
     reflector->draw(shader);
 }
 
+/*
+void MainController::draw_island() {
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    auto shader = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("basic");
+    auto island = engine::core::Controller::get<engine::resources::ResourcesController>()->model("island");
+    auto program_state = engine::core::Controller::get<ProgramStateController>();
+    shader->use();
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(program_state->m_island_position[0], program_state->m_island_position[1], program_state->m_island_position[2]));// island position
+    model = glm::scale(model, glm::vec3(0.05f));
+    glm::mat4 projection = graphics->projection_matrix();
+    glm::mat4 view = graphics->camera()->view_matrix();
+
+    shader->set_mat4("projection", projection);
+    shader->set_mat4("view", view);
+    shader->set_mat4("model", model);
+
+    island->draw(shader);
+}
+*/
+
 void MainController::update_camera() {
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     auto gui_controller = engine::core::Controller::get<GuiController>();
