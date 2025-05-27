@@ -58,6 +58,7 @@ uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform SpotLight spotLight;
 uniform sampler2D texture_diffuse1;
+uniform bool lighthouse;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -72,7 +73,7 @@ void main()
 
     // bloom
     float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
-    if (brightness > 1.0) {
+    if (brightness > 1.0 && lighthouse) {
         BrightColor = vec4(result, 1.0);
         LighthouseLightColor = vec4(result, 1.0);
     }

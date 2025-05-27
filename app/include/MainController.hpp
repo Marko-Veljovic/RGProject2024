@@ -6,36 +6,36 @@
 
 namespace app {
 
-    class MainController : public engine::core::Controller {
-        std::unique_ptr<BloomEffect> m_bloom_effect;
-        std::unique_ptr<VolumetricLight> m_volumetric_light;
+class MainController : public engine::core::Controller {
+    std::unique_ptr<BloomEffect> m_bloom_effect;
+    std::unique_ptr<VolumetricLight> m_volumetric_light;
 
-        void initialize() override;
+    void initialize() override;
 
-        bool loop() override;
+    bool loop() override;
 
-        void draw_lighthouse();
+    void draw_lighthouse();
 
-        void draw_reflector();
+    void draw_reflector();
 
-        void update_camera();
+    void draw_water();
 
-        void update() override;
+    void update_camera();
 
-        void begin_draw() override;
+    void update() override;
 
-        void draw_skybox();
+    void begin_draw() override;
 
-        void draw() override;
+    void draw_skybox();
 
-        void end_draw() override;
+    void draw() override;
 
-    public:
-        std::string_view name() const override {
-            return "app::MainController";
-        }
-    };
+    void end_draw() override;
 
-} // app
+public:
+    std::string_view name() const override { return "app::MainController"; }
+};
+
+}// app
 
 #endif //MAINCONTROLLER_HPP

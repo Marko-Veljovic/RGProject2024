@@ -125,7 +125,9 @@ void MainController::draw_lighthouse() {
     shader->set_vec3("spotLight.diffuse", glm::vec3(10.0f, 10.0f, 10.0f));
     shader->set_vec3("spotLight.specular", glm::vec3(10.0f, 10.0f, 10.0f));
 
+    shader->set_bool("lighthouse", true);// write to lighthouse light buffer
     lighthouse->draw(shader);
+    shader->set_bool("lighthouse", false);// disable further writing to it
 }
 
 void MainController::draw_reflector() {
@@ -154,6 +156,27 @@ void MainController::draw_reflector() {
     volumetric_light_shader->set_vec4("screen_space_light_position", screen_space);
 
     reflector->draw(shader);
+}
+
+void MainController::draw_water() {
+    auto resource = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+
+    // Shader
+    engine::resources::Shader *shader = resource->shader("basic");
+
+    // Texture
+    // unsigned int water_texture = m_bloom_effect->load_texture("");
+
+    shader->use();
+    shader->set_mat4("projection", graphics->projection_matrix());
+    shader->set_mat4("view", graphics->camera()->view_matrix());
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(20.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));// lightCube position
+    shader->set_mat4("model", model);
+
+    m_bloom_effect->draw_water();
 }
 
 /*
@@ -221,6 +244,7 @@ void MainController::draw() {
 
     draw_lighthouse();
     draw_reflector();
+    draw_water();
     draw_skybox();
 
     m_bloom_effect->bind_default_fbo();
@@ -235,11 +259,13 @@ void MainController::draw() {
         blur_shader->set_bool("horizontal", horizontal);
         m_bloom_effect->bind_ping_pong_texture(first_iteration, horizontal);
         m_bloom_effect->render_quad();
+
         // for volumetric
         m_bloom_effect->bind_ping_pong_fbo2(horizontal);
         blur_shader->set_bool("horizontal", horizontal);
         m_bloom_effect->bind_ping_pong_texture2(first_iteration, horizontal);
         m_bloom_effect->render_quad();
+
         // end
         horizontal = !horizontal;
         if (first_iteration) first_iteration = false;

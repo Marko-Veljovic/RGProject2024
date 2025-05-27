@@ -12,6 +12,9 @@ private:
     unsigned int m_quad_VAO = 0;
     unsigned int m_quad_VBO;
 
+    unsigned int m_water_VAO = 0; // water drawing
+    unsigned int m_water_VBO;     // water drawing
+
 public:
     void init(unsigned int screen_width, unsigned int screen_height);
 
@@ -34,6 +37,10 @@ public:
     void active_volumetric_texture(bool horizontal);
 
     void render_quad();
+
+    void draw_water(); // water drawing
+
+    int load_texture(char const *path); // texture loading
 };
 
 #endif //BLOOMEFFECT_HPP

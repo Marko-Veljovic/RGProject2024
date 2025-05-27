@@ -1,6 +1,7 @@
 #include "engine/graphics/BloomEffect.hpp"
 #include <glad/glad.h>
 #include <engine/graphics/OpenGL.hpp>
+#include <stb_image.h>
 
 #include <spdlog/spdlog.h>
 
@@ -114,4 +115,70 @@ void BloomEffect::render_quad() {
     CHECKED_GL_CALL(glBindVertexArray, m_quad_VAO);
     CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
     CHECKED_GL_CALL(glBindVertexArray, 0);
+}
+
+void BloomEffect::draw_water() {
+    // water drawing
+    if (m_water_VAO == 0) {
+        float water_vertices[] = {
+                // positions          // normals           // texCoords
+                5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f,
+                -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+                -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f,
+
+                5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f,
+                -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f,
+                5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 2.0f
+        };
+
+
+        // setup water VAO
+        CHECKED_GL_CALL(glGenVertexArrays, 1, &m_water_VAO);
+        CHECKED_GL_CALL(glGenBuffers, 1, &m_water_VBO);
+        CHECKED_GL_CALL(glBindVertexArray, m_water_VAO);
+        CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_water_VBO);
+        CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(water_vertices), &water_vertices, GL_STATIC_DRAW);
+        CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
+        CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+        CHECKED_GL_CALL(glEnableVertexAttribArray, 1);
+        CHECKED_GL_CALL(glVertexAttribPointer, 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *) (3 * sizeof(float)));
+        CHECKED_GL_CALL(glEnableVertexAttribArray, 2);
+        CHECKED_GL_CALL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *) (6 * sizeof(float)));
+    }
+
+    CHECKED_GL_CALL(glBindVertexArray, m_water_VAO);
+    CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6);
+    CHECKED_GL_CALL(glBindVertexArray, 0);
+}
+
+int BloomEffect::load_texture(char const *path) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data) {
+        GLenum format;
+        if (nrComponents == 1) format = GL_RED;
+        else if (nrComponents == 3) format = GL_RGB;
+        else if (nrComponents == 4) format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    } else {
+        spdlog::error("ERROR::TEXTURE:: Texture failed to load!");
+        stbi_image_free(data);
+    }
+
+    return textureID;
 }
