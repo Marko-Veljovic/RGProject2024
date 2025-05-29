@@ -6,6 +6,7 @@
 #include <GUIController.hpp>
 #include <MainController.hpp>
 #include <ProgramStateController.hpp>
+#include <engine/graphics/WaterEffect.hpp>
 #include <spdlog/spdlog.h>
 
 namespace app {
@@ -72,6 +73,9 @@ void MainController::initialize() {
     volumetric_light_shader->set_float("coefficients.exposure", 1.0f);
     volumetric_light_shader->set_float("coefficients.decay", 1.0f);
     volumetric_light_shader->set_float("coefficients.weight", 0.05f);
+
+    // water effect
+    m_water_effect = std::make_unique<WaterEffect>();
 }
 
 bool MainController::loop() {
@@ -163,7 +167,7 @@ void MainController::draw_water() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
 
     // Shader
-    engine::resources::Shader *shader = resource->shader("basic");
+    engine::resources::Shader *shader = resource->shader("water");
 
     // Texture
     // unsigned int water_texture = m_bloom_effect->load_texture("");
@@ -172,11 +176,40 @@ void MainController::draw_water() {
     shader->set_mat4("projection", graphics->projection_matrix());
     shader->set_mat4("view", graphics->camera()->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(20.0f));
+    model = glm::scale(model, glm::vec3(5.0f));
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));// lightCube position
     shader->set_mat4("model", model);
 
-    m_bloom_effect->draw_water();
+    // directional light
+    shader->set_vec3("dirLight.direction", glm::vec3(0.57f, -0.15f, 0.8f));
+    // correct dir light
+    shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+    shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+    shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
+
+    // DEBUG dir light
+    // shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
+    // shader->set_vec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
+
+    shader->set_vec3("viewPos", graphics->camera()->Position);
+
+    // spotlight
+    auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
+    float time = platform->frame_time().current;
+
+    shader->set_vec3("spotLight.position", glm::vec3(0.0f, 2.67f, -3.0f));
+    shader->set_vec3("spotLight.direction", glm::vec3(glm::sin(2 * time), 0.0f, glm::cos(2 * time)));
+    shader->set_float("spotLight.cutOff", glm::cos(glm::radians(20.0f)));
+    shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(22.0f)));
+    shader->set_float("spotLight.constant", 1.0f);
+    shader->set_float("spotLight.linear", 0.009f);
+    shader->set_float("spotLight.quadratic", 0.0032f);
+    shader->set_vec3("spotLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader->set_vec3("spotLight.diffuse", glm::vec3(10.0f, 10.0f, 10.0f));
+    shader->set_vec3("spotLight.specular", glm::vec3(10.0f, 10.0f, 10.0f));
+
+    m_water_effect->draw_water();
 }
 
 /*
