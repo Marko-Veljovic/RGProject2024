@@ -20,6 +20,8 @@ class MainController : public engine::core::Controller {
 
     void draw_reflector();
 
+    void prepare_reflection_texture();
+
     void draw_water();
 
     void update_camera();

@@ -5,7 +5,7 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 
-out vec2 TexCoords;
+out vec4 clipSpaceCoords;
 out vec3 Normal;
 out vec3 FragPos;
 
@@ -13,19 +13,22 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform vec4 plane;
+
 void main()
 {
     FragPos = vec3(model * vec4(aPos, 1.0));
+
+    //gl_ClipDistance[0] = dot(vec4(FragPos, 1.0), plane);
+
     Normal = aNormal;
-    TexCoords = aTexCoords;
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+    clipSpaceCoords = projection * view * vec4(FragPos, 1.0);
+    gl_Position = clipSpaceCoords;
 }
 
 //#shader fragment
 #version 330 core
-layout (location = 0) out vec4 FragColor;
-layout (location = 1) out vec4 BrightColor;
-layout (location = 2) out vec4 LighthouseLightColor;
+out vec4 FragColor;
 
 struct DirLight {
     vec3 direction;
@@ -52,40 +55,31 @@ struct SpotLight {
 
 in vec3 FragPos;
 in vec3 Normal;
-in vec2 TexCoords;
+in vec4 clipSpaceCoords;
 
 uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform SpotLight spotLight;
-uniform sampler2D texture_diffuse1;
-uniform bool lighthouse;
+uniform sampler2D reflectionTexture;
 
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
-vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec2 reflectionTextureCoords);
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec2 reflectionTextureCoords);
 
 void main()
 {
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    vec3 result = CalcDirLight(dirLight, norm, viewDir);
-    result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
+    vec2 ndc = (clipSpaceCoords.xy / clipSpaceCoords.w) / 2.0 + 0.5;
+    vec2 reflectionTextureCoords = vec2(ndc.x, -ndc.y);
 
-    // bloom
-    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
-    if (brightness > 1.0 && lighthouse) {
-        BrightColor = vec4(result, 1.0);
-        LighthouseLightColor = vec4(result, 1.0);
-    }
-    else {
-        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
-        LighthouseLightColor = vec4(0.0, 0.0, 0.0, 1.0);
-    }
+    vec3 result = CalcDirLight(dirLight, norm, viewDir, reflectionTextureCoords);
+    result += CalcSpotLight(spotLight, norm, FragPos, viewDir, reflectionTextureCoords);
 
     FragColor = vec4(result, 1.0);
 }
 
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec2 reflectionTextureCoords)
 {
     vec3 lightDir = normalize(-light.direction);
     // diffuse shading
@@ -94,13 +88,13 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 2);
     // combine results
-    vec3 ambient = light.ambient * vec3(0.0, 0.0, 1.0);
-    vec3 diffuse = light.diffuse * diff * vec3(0.0, 0.0, 1.0);
-    vec3 specular = light.specular * spec * vec3(0.0, 0.0, 1.0);
+    vec3 ambient = light.ambient * vec3(texture(reflectionTexture, reflectionTextureCoords));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(reflectionTexture, reflectionTextureCoords));
+    vec3 specular = light.specular * spec * vec3(texture(reflectionTexture, reflectionTextureCoords));
     return (ambient + diffuse + specular);
 }
 
-vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec2 reflectionTextureCoords)
 {
     vec3 lightDir = normalize(light.position - fragPos);
     // diffuse shading
@@ -116,9 +110,9 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float epsilon = light.cutOff - light.outerCutOff;
     float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
     // combine results
-    vec3 ambient = light.ambient * vec3(0.0, 0.0, 1.0);
-    vec3 diffuse = light.diffuse * diff * vec3(0.0, 0.0, 1.0);
-    vec3 specular = light.specular * spec * vec3(0.0, 0.0, 1.0);
+    vec3 ambient = light.ambient * vec3(texture(reflectionTexture, reflectionTextureCoords));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(reflectionTexture, reflectionTextureCoords));
+    vec3 specular = light.specular * spec * vec3(texture(reflectionTexture, reflectionTextureCoords));
     ambient *= attenuation * intensity;
     diffuse *= attenuation * intensity;
     specular *= attenuation * intensity;

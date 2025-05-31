@@ -6,6 +6,7 @@
 #include <GUIController.hpp>
 #include <MainController.hpp>
 #include <ProgramStateController.hpp>
+#include <json.hpp>
 #include <engine/graphics/WaterEffect.hpp>
 #include <spdlog/spdlog.h>
 
@@ -39,6 +40,7 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
 void MainController::initialize() {
     auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
     platform->register_platform_event_observer(std::make_unique<MainPlatformEventObserver>());
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     engine::graphics::OpenGL::enable_depth_testing();
 
     // bloom effect
@@ -47,8 +49,6 @@ void MainController::initialize() {
 
     m_bloom_effect = std::make_unique<BloomEffect>();
     m_bloom_effect->init(screen_width, screen_height);
-
-    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
 
     auto blur_shader = resources->shader("blur");
     blur_shader->use();
@@ -76,6 +76,10 @@ void MainController::initialize() {
 
     // water effect
     m_water_effect = std::make_unique<WaterEffect>();
+    m_water_effect->init();
+    auto water_shader = resources->shader("water");
+    water_shader->use();
+    water_shader->set_int("reflectionTexture", 0);
 }
 
 bool MainController::loop() {
@@ -162,22 +166,51 @@ void MainController::draw_reflector() {
     reflector->draw(shader);
 }
 
+void MainController::prepare_reflection_texture() {
+    auto resource = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
+    auto camera = graphics->camera();
+
+    float water_height = 0.0f;
+
+    float distance = 2 * (camera->Position.y - water_height);
+    camera->Position.y -= distance;
+    camera->Pitch = -camera->Pitch;
+
+    //m_water_effect->enable_clip_distance();
+    m_water_effect->bind_reflection_fbo();
+    m_bloom_effect->clear_color_depth_buffers();
+
+    draw_lighthouse();
+    draw_reflector();
+    draw_skybox();
+
+    camera->Position.y += distance;
+    camera->Pitch = -camera->Pitch;
+
+    int screen_width = platform->window()->width();
+    int screen_height = platform->window()->height();
+    m_water_effect->bind_default_fbo(screen_width, screen_height);
+    //m_water_effect->disable_clip_distance();
+}
+
 void MainController::draw_water() {
     auto resource = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    auto camera = graphics->camera();
+
+    float water_height = 0.0f;
 
     // Shader
     engine::resources::Shader *shader = resource->shader("water");
 
-    // Texture
-    // unsigned int water_texture = m_bloom_effect->load_texture("");
-
     shader->use();
     shader->set_mat4("projection", graphics->projection_matrix());
-    shader->set_mat4("view", graphics->camera()->view_matrix());
+    shader->set_mat4("view", camera->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::scale(model, glm::vec3(5.0f));
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));// lightCube position
+    model = glm::translate(model, glm::vec3(0.0f, water_height, -3.0f));
     shader->set_mat4("model", model);
 
     // directional light
@@ -192,7 +225,7 @@ void MainController::draw_water() {
     // shader->set_vec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
     // shader->set_vec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
 
-    shader->set_vec3("viewPos", graphics->camera()->Position);
+    shader->set_vec3("viewPos", camera->Position);
 
     // spotlight
     auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
@@ -209,6 +242,9 @@ void MainController::draw_water() {
     shader->set_vec3("spotLight.diffuse", glm::vec3(10.0f, 10.0f, 10.0f));
     shader->set_vec3("spotLight.specular", glm::vec3(10.0f, 10.0f, 10.0f));
 
+    shader->set_vec4("plane", glm::vec4(0.0f, 1.0f, 0.0f, -water_height));
+
+    m_water_effect->active_reflection_texture();
     m_water_effect->draw_water();
 }
 
@@ -271,14 +307,17 @@ void MainController::draw() {
     auto bloom_shader = resources->shader("bloom");
     auto volumetric_light_shader = resources->shader("volumetricLight");
 
+    // this part should get reflection texture ready
+    prepare_reflection_texture();
+
     // 1. render scene into floating point framebuffer
     m_bloom_effect->bind_hdr_fbo();
     m_bloom_effect->clear_color_depth_buffers();
 
     draw_lighthouse();
     draw_reflector();
-    draw_water();
     draw_skybox();
+    draw_water();// this function should just draw water plane with the finished texture
 
     m_bloom_effect->bind_default_fbo();
 

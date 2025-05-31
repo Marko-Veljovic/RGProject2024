@@ -13,11 +13,17 @@ private:
     unsigned int m_water_VBO;
 
 public:
-    void init(unsigned int screen_width, unsigned int screen_height);
+    void init();
 
     void bind_reflection_fbo();
 
     void bind_default_fbo(unsigned int screen_width, unsigned int screen_height);
+
+    void enable_clip_distance();
+
+    void disable_clip_distance();
+
+    void active_reflection_texture();
 
     void draw_water();
 };
