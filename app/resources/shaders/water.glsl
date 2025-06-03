@@ -19,7 +19,7 @@ void main()
 {
     FragPos = vec3(model * vec4(aPos, 1.0));
 
-    //gl_ClipDistance[0] = dot(vec4(FragPos, 1.0), plane);
+    gl_ClipDistance[0] = dot(vec4(FragPos, 1.0), plane);
 
     Normal = aNormal;
     clipSpaceCoords = projection * view * vec4(FragPos, 1.0);

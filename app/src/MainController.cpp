@@ -111,11 +111,6 @@ void MainController::draw_lighthouse() {
     shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
     shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
 
-    // DEBUG dir light
-    // shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
-    // shader->set_vec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
-
     shader->set_vec3("viewPos", graphics->camera()->Position);
 
     // spotlight
@@ -132,6 +127,8 @@ void MainController::draw_lighthouse() {
     shader->set_vec3("spotLight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
     shader->set_vec3("spotLight.diffuse", glm::vec3(10.0f, 10.0f, 10.0f));
     shader->set_vec3("spotLight.specular", glm::vec3(10.0f, 10.0f, 10.0f));
+
+    shader->set_vec4("plane", glm::vec4(0.0f, 1.0f, 0.0f, -0.0f));
 
     shader->set_bool("lighthouse", true);// write to lighthouse light buffer
     lighthouse->draw(shader);
@@ -177,8 +174,9 @@ void MainController::prepare_reflection_texture() {
     float distance = 2 * (camera->Position.y - water_height);
     camera->Position.y -= distance;
     camera->Pitch = -camera->Pitch;
+    camera->update_camera_vectors(); // HACK: made method public
 
-    //m_water_effect->enable_clip_distance();
+    m_water_effect->enable_clip_distance();
     m_water_effect->bind_reflection_fbo();
     m_bloom_effect->clear_color_depth_buffers();
 
@@ -188,11 +186,12 @@ void MainController::prepare_reflection_texture() {
 
     camera->Position.y += distance;
     camera->Pitch = -camera->Pitch;
+    camera->update_camera_vectors(); // HACK: made method public
 
     int screen_width = platform->window()->width();
     int screen_height = platform->window()->height();
     m_water_effect->bind_default_fbo(screen_width, screen_height);
-    //m_water_effect->disable_clip_distance();
+    m_water_effect->disable_clip_distance();
 }
 
 void MainController::draw_water() {
@@ -209,7 +208,7 @@ void MainController::draw_water() {
     shader->set_mat4("projection", graphics->projection_matrix());
     shader->set_mat4("view", camera->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(5.0f));
+    model = glm::scale(model, glm::vec3(10.0f));
     model = glm::translate(model, glm::vec3(0.0f, water_height, -3.0f));
     shader->set_mat4("model", model);
 
@@ -219,11 +218,6 @@ void MainController::draw_water() {
     shader->set_vec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
     shader->set_vec3("dirLight.diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
     shader->set_vec3("dirLight.specular", glm::vec3(0.2f, 0.2f, 0.2f));
-
-    // DEBUG dir light
-    // shader->set_vec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-    // shader->set_vec3("dirLight.diffuse", glm::vec3(0.0f, 0.0f, 0.0f));
-    // shader->set_vec3("dirLight.specular", glm::vec3(0.0f, 0.0f, 0.0f));
 
     shader->set_vec3("viewPos", camera->Position);
 
