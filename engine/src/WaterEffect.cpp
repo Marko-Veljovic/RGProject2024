@@ -1,4 +1,6 @@
 #include "engine/graphics/WaterEffect.hpp"
+
+#include <stb_image.h>
 #include <glad/glad.h>
 #include <engine/graphics/OpenGL.hpp>
 
@@ -44,6 +46,11 @@ void WaterEffect::disable_clip_distance() { CHECKED_GL_CALL(glDisable, GL_CLIP_D
 void WaterEffect::active_reflection_texture() {
     CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffer);
+}
+
+void WaterEffect::active_dudv_map(unsigned int texture_id) {
+    CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE1);
+    CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
 }
 
 void WaterEffect::draw_water() {

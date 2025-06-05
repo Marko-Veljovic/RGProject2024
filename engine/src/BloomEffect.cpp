@@ -117,42 +117,6 @@ void BloomEffect::render_quad() {
     CHECKED_GL_CALL(glBindVertexArray, 0);
 }
 
-void BloomEffect::draw_water() {
-    // water drawing
-    if (m_water_VAO == 0) {
-        float water_vertices[] = {
-                // positions          // normals           // texCoords
-                5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f,
-                -5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-                -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f,
-
-                5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f,
-                -5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f,
-                5.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 2.0f
-        };
-
-
-        // setup water VAO
-        CHECKED_GL_CALL(glGenVertexArrays, 1, &m_water_VAO);
-        CHECKED_GL_CALL(glGenBuffers, 1, &m_water_VBO);
-        CHECKED_GL_CALL(glBindVertexArray, m_water_VAO);
-        CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_water_VBO);
-        CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(water_vertices), &water_vertices, GL_STATIC_DRAW);
-        CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
-        CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-        CHECKED_GL_CALL(glEnableVertexAttribArray, 1);
-        CHECKED_GL_CALL(glVertexAttribPointer, 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *) (3 * sizeof(float)));
-        CHECKED_GL_CALL(glEnableVertexAttribArray, 2);
-        CHECKED_GL_CALL(glVertexAttribPointer, 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *) (6 * sizeof(float)));
-    }
-
-    CHECKED_GL_CALL(glBindVertexArray, m_water_VAO);
-    CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6);
-    CHECKED_GL_CALL(glBindVertexArray, 0);
-}
-
 int BloomEffect::load_texture(char const *path) {
     unsigned int textureID;
     glGenTextures(1, &textureID);

@@ -25,6 +25,8 @@ public:
 
     void active_reflection_texture();
 
+    void active_dudv_map(unsigned int texture_id);
+
     void draw_water();
 };
 

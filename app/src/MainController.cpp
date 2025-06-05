@@ -80,6 +80,7 @@ void MainController::initialize() {
     auto water_shader = resources->shader("water");
     water_shader->use();
     water_shader->set_int("reflectionTexture", 0);
+    water_shader->set_int("dudvMap", 1);
 }
 
 bool MainController::loop() {
@@ -174,7 +175,7 @@ void MainController::prepare_reflection_texture() {
     float distance = 2 * (camera->Position.y - water_height);
     camera->Position.y -= distance;
     camera->Pitch = -camera->Pitch;
-    camera->update_camera_vectors(); // HACK: made method public
+    camera->update_camera_vectors();// HACK: made method public
 
     m_water_effect->enable_clip_distance();
     m_water_effect->bind_reflection_fbo();
@@ -186,7 +187,7 @@ void MainController::prepare_reflection_texture() {
 
     camera->Position.y += distance;
     camera->Pitch = -camera->Pitch;
-    camera->update_camera_vectors(); // HACK: made method public
+    camera->update_camera_vectors();// HACK: made method public
 
     int screen_width = platform->window()->width();
     int screen_height = platform->window()->height();
@@ -238,7 +239,11 @@ void MainController::draw_water() {
 
     shader->set_vec4("plane", glm::vec4(0.0f, 1.0f, 0.0f, -water_height));
 
+    engine::resources::Texture *dudv_map = resource->texture("dudvMap");
+    unsigned int dudv_map_id = dudv_map->id();
+
     m_water_effect->active_reflection_texture();
+    m_water_effect->active_dudv_map(dudv_map_id);
     m_water_effect->draw_water();
 }
 

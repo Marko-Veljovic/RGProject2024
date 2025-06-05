@@ -61,6 +61,7 @@ uniform vec3 viewPos;
 uniform DirLight dirLight;
 uniform SpotLight spotLight;
 uniform sampler2D reflectionTexture;
+uniform sampler2D dudvMap;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec2 reflectionTextureCoords);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec2 reflectionTextureCoords);
