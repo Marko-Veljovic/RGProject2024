@@ -27,6 +27,8 @@ public:
 
     void active_dudv_map(unsigned int texture_id);
 
+    void active_texture0();
+
     void draw_water();
 };
 

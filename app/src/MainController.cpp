@@ -238,12 +238,16 @@ void MainController::draw_water() {
     shader->set_vec3("spotLight.specular", glm::vec3(10.0f, 10.0f, 10.0f));
 
     shader->set_vec4("plane", glm::vec4(0.0f, 1.0f, 0.0f, -water_height));
+    float moveFactorSpeed = 0.03f;// tweak this to control speed
+    float moveFactor = fmod(moveFactorSpeed * time, 1.0f);
+    shader->set_float("moveFactor", moveFactor);
 
     engine::resources::Texture *dudv_map = resource->texture("dudvMap");
     unsigned int dudv_map_id = dudv_map->id();
 
     m_water_effect->active_reflection_texture();
     m_water_effect->active_dudv_map(dudv_map_id);
+    m_water_effect->active_texture0();
     m_water_effect->draw_water();
 }
 

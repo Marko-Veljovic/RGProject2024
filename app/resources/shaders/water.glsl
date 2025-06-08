@@ -6,6 +6,7 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 
 out vec4 clipSpaceCoords;
+out vec2 TexCoords;
 out vec3 Normal;
 out vec3 FragPos;
 
@@ -15,6 +16,8 @@ uniform mat4 projection;
 
 uniform vec4 plane;
 
+const float tiling = 6.0;
+
 void main()
 {
     FragPos = vec3(model * vec4(aPos, 1.0));
@@ -22,6 +25,7 @@ void main()
     gl_ClipDistance[0] = dot(vec4(FragPos, 1.0), plane);
 
     Normal = aNormal;
+    TexCoords = aTexCoords * tiling;
     clipSpaceCoords = projection * view * vec4(FragPos, 1.0);
     gl_Position = clipSpaceCoords;
 }
@@ -55,6 +59,7 @@ struct SpotLight {
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 TexCoords;
 in vec4 clipSpaceCoords;
 
 uniform vec3 viewPos;
@@ -62,6 +67,9 @@ uniform DirLight dirLight;
 uniform SpotLight spotLight;
 uniform sampler2D reflectionTexture;
 uniform sampler2D dudvMap;
+uniform float moveFactor;
+
+const float waveStrength = 0.02;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec2 reflectionTextureCoords);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec2 reflectionTextureCoords);
@@ -73,6 +81,14 @@ void main()
 
     vec2 ndc = (clipSpaceCoords.xy / clipSpaceCoords.w) / 2.0 + 0.5;
     vec2 reflectionTextureCoords = vec2(ndc.x, -ndc.y);
+
+    vec2 distortion1 = waveStrength * (texture(dudvMap, vec2(TexCoords.x + moveFactor, TexCoords.y)).rg * 2.0 - 1.0);
+    vec2 distortion2 = waveStrength * (texture(dudvMap, vec2(-TexCoords.x + moveFactor, TexCoords.y + moveFactor)).rg * 2.0 - 1.0);
+    vec2 totalDistortion = distortion1 + distortion2;
+
+    reflectionTextureCoords += totalDistortion;
+    reflectionTextureCoords.x = clamp(reflectionTextureCoords.x, 0.001, 0.999);
+    reflectionTextureCoords.y = clamp(reflectionTextureCoords.y, -0.999, -0.001);
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir, reflectionTextureCoords);
     result += CalcSpotLight(spotLight, norm, FragPos, viewDir, reflectionTextureCoords);

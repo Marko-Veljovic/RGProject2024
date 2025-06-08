@@ -53,6 +53,8 @@ void WaterEffect::active_dudv_map(unsigned int texture_id) {
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, texture_id);
 }
 
+void WaterEffect::active_texture0() { CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0); }
+
 void WaterEffect::draw_water() {
     if (m_water_VAO == 0) {
         float water_vertices[] = {
