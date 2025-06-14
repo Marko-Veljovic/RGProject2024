@@ -4,17 +4,17 @@
 
 namespace app {
 
-    class ProgramStateController : public engine::core::Controller {
-    public:
-        float m_exposure = 0.1;
+class ProgramStateController : public engine::core::Controller {
+public:
+    float m_exposure = 0.1;
 
-        bool m_bloom_enabled = true;
+    bool m_bloom_enabled = true;
 
-        std::string_view name() const override {
-            return "app::ProgramStateController";
-        }
-    };
+    float m_island_position[3];
 
-} // app
+    std::string_view name() const override { return "app::ProgramStateController"; }
+};
+
+}// app
 
 #endif //PROGRAMSTATECONTROLLER_HPP

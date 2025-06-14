@@ -101,7 +101,7 @@ void MainController::draw_lighthouse() {
     shader->set_mat4("projection", graphics->projection_matrix());
     shader->set_mat4("view", graphics->camera()->view_matrix());
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
+    model = glm::translate(model, glm::vec3(0.0f, m_lighthouse_y, -3.0f));
     model = glm::scale(model, glm::vec3(0.3f));
     shader->set_mat4("model", model);
 
@@ -118,7 +118,7 @@ void MainController::draw_lighthouse() {
     auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
     float time = platform->frame_time().current;
 
-    shader->set_vec3("spotLight.position", glm::vec3(0.0f, 2.67f, -3.0f));
+    shader->set_vec3("spotLight.position", glm::vec3(0.0f, m_lighthouse_y + 2.67f, -3.0f));
     shader->set_vec3("spotLight.direction", glm::vec3(glm::sin(2 * time), 0.0f, glm::cos(2 * time)));
     shader->set_float("spotLight.cutOff", glm::cos(glm::radians(20.0f)));
     shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(22.0f)));
@@ -145,7 +145,7 @@ void MainController::draw_reflector() {
     shader->use();
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 2.67f, -3.0f));// lightCube position
+    model = glm::translate(model, glm::vec3(0.0f, m_lighthouse_y + 2.67f, -3.0f));// lightCube position
     model = glm::scale(model, glm::vec3(0.1f));
     glm::mat4 projection = graphics->projection_matrix();
     glm::mat4 view = graphics->camera()->view_matrix();
@@ -183,6 +183,7 @@ void MainController::prepare_reflection_texture() {
 
     draw_lighthouse();
     draw_reflector();
+    draw_island();
     draw_skybox();
 
     camera->Position.y += distance;
@@ -226,7 +227,7 @@ void MainController::draw_water() {
     auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
     float time = platform->frame_time().current;
 
-    shader->set_vec3("spotLight.position", glm::vec3(0.0f, 2.67f, -3.0f));
+    shader->set_vec3("spotLight.position", glm::vec3(0.0f, m_lighthouse_y + 2.67f, -3.0f));
     shader->set_vec3("spotLight.direction", glm::vec3(glm::sin(2 * time), 0.0f, glm::cos(2 * time)));
     shader->set_float("spotLight.cutOff", glm::cos(glm::radians(20.0f)));
     shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(22.0f)));
@@ -251,7 +252,6 @@ void MainController::draw_water() {
     m_water_effect->draw_water();
 }
 
-/*
 void MainController::draw_island() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto shader = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("basic");
@@ -260,7 +260,7 @@ void MainController::draw_island() {
     shader->use();
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(program_state->m_island_position[0], program_state->m_island_position[1], program_state->m_island_position[2]));// island position
+    model = glm::translate(model, glm::vec3(-0.73f, -0.68f, -3.15f));
     model = glm::scale(model, glm::vec3(0.05f));
     glm::mat4 projection = graphics->projection_matrix();
     glm::mat4 view = graphics->camera()->view_matrix();
@@ -271,7 +271,6 @@ void MainController::draw_island() {
 
     island->draw(shader);
 }
-*/
 
 void MainController::update_camera() {
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -319,6 +318,7 @@ void MainController::draw() {
 
     draw_lighthouse();
     draw_reflector();
+    draw_island();
     draw_skybox();
     draw_water();// this function should just draw water plane with the finished texture
 

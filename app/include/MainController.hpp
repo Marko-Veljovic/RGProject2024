@@ -11,6 +11,7 @@ class MainController : public engine::core::Controller {
     std::unique_ptr<BloomEffect> m_bloom_effect;
     std::unique_ptr<VolumetricLight> m_volumetric_light;
     std::unique_ptr<WaterEffect> m_water_effect;
+    float m_lighthouse_y = 0.7f;
 
     void initialize() override;
 
@@ -23,6 +24,8 @@ class MainController : public engine::core::Controller {
     void prepare_reflection_texture();
 
     void draw_water();
+
+    void draw_island();
 
     void update_camera();
 

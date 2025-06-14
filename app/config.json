@@ -9,6 +9,9 @@
       },
       "cube": {
         "path": "cube/cube.fbx"
+      },
+      "island": {
+        "path": "floating_island/scene.gltf"
       }
     }
   },
