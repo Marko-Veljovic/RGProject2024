@@ -309,7 +309,6 @@ void MainController::draw() {
     auto bloom_shader = resources->shader("bloom");
     auto volumetric_light_shader = resources->shader("volumetricLight");
 
-    // this part should get reflection texture ready
     prepare_reflection_texture();
 
     // 1. render scene into floating point framebuffer
@@ -320,7 +319,7 @@ void MainController::draw() {
     draw_reflector();
     draw_island();
     draw_skybox();
-    draw_water();// this function should just draw water plane with the finished texture
+    draw_water();
 
     m_bloom_effect->bind_default_fbo();
 
