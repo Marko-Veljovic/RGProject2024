@@ -13,7 +13,7 @@ private:
     unsigned int m_quad_VBO;
 
 public:
-    void init(unsigned int screen_width, unsigned int screen_height);
+    void init(unsigned int buffer_width, unsigned int buffer_height);
 
     void bind_hdr_fbo();
 

@@ -9,7 +9,7 @@ class VolumetricLight {
     unsigned int m_depth_stencil_buffer;
 
 public:
-    void init(unsigned int screen_width, unsigned int screen_height);
+    void init(unsigned int buffer_width, unsigned int buffer_height);
 
     void bind_hdr_fbo();
 

@@ -16,6 +16,8 @@ class MainPlatformEventObserver : public engine::platform::PlatformEventObserver
     void on_mouse_move(engine::platform::MousePosition position) override;
 
     void on_scroll(engine::platform::MousePosition position) override;
+
+    void on_window_resize(int width, int height) override;
 };
 
 void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
@@ -35,6 +37,10 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
 
     camera->zoom(mouse.scroll);
     graphics->perspective_params().FOV = glm::radians(camera->Zoom);
+}
+
+void MainPlatformEventObserver::on_window_resize(int width, int height) {
+    // need to put glViewport(0, 0, width, height);
 }
 
 void MainController::initialize() {

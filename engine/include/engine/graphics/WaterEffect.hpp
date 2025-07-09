@@ -6,8 +6,8 @@ private:
     unsigned int m_FBO;
     unsigned int m_color_buffer;
 
-    unsigned const int m_REFLECTION_WIDTH  = 320;
-    unsigned const int m_REFLECTION_HEIGHT = 180;
+    unsigned const int m_FBO_WIDTH  = 320;
+    unsigned const int m_FBO_HEIGHT = 180;
 
     unsigned int m_water_VAO = 0;
     unsigned int m_water_VBO;
@@ -17,7 +17,7 @@ public:
 
     void bind_reflection_fbo();
 
-    void bind_default_fbo(unsigned int screen_width, unsigned int screen_height);
+    void bind_default_fbo(unsigned int buffer_width, unsigned int buffer_height);
 
     void enable_clip_distance();
 

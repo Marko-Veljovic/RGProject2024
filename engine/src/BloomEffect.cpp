@@ -5,7 +5,7 @@
 
 #include <spdlog/spdlog.h>
 
-void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
+void BloomEffect::init(unsigned int buffer_width, unsigned int buffer_height) {
     // hdr_FBO
     CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_FBO);
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
@@ -14,7 +14,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     CHECKED_GL_CALL(glGenTextures, 3, m_color_buffers);
     for (unsigned int i = 0; i < 3; i++) {
         CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffers[i]);
-        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT,
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, buffer_width, buffer_height, 0, GL_RGBA, GL_FLOAT,
                         nullptr);
         CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -28,7 +28,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     unsigned int rbo_depth;
     CHECKED_GL_CALL(glGenRenderbuffers, 1, &rbo_depth);
     CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, rbo_depth);
-    CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen_width, screen_height);
+    CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, buffer_width, buffer_height);
     CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_depth);
 
     unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
@@ -42,7 +42,7 @@ void BloomEffect::init(unsigned int screen_width, unsigned int screen_height) {
     for (unsigned int i = 0; i < 4; i++) {
         CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[i]);
         CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[i]);
-        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, screen_width, screen_height, 0, GL_RGBA, GL_FLOAT,
+        CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, buffer_width, buffer_height, 0, GL_RGBA, GL_FLOAT,
                         nullptr);
         CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

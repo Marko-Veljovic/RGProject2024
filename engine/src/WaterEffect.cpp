@@ -12,7 +12,7 @@ void WaterEffect::init() {
 
     CHECKED_GL_CALL(glGenTextures, 1, &m_color_buffer);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffer);
-    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, m_REFLECTION_WIDTH, m_REFLECTION_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, m_FBO_WIDTH, m_FBO_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -21,7 +21,7 @@ void WaterEffect::init() {
     unsigned int rbo_depth;
     CHECKED_GL_CALL(glGenRenderbuffers, 1, &rbo_depth);
     CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, rbo_depth);
-    CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_REFLECTION_WIDTH, m_REFLECTION_HEIGHT);
+    CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_FBO_WIDTH, m_FBO_HEIGHT);
     CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_depth);
 
     if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
@@ -31,12 +31,12 @@ void WaterEffect::init() {
 
 void WaterEffect::bind_reflection_fbo() {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_FBO);
-    CHECKED_GL_CALL(glViewport, 0, 0, m_REFLECTION_WIDTH, m_REFLECTION_HEIGHT);
+    CHECKED_GL_CALL(glViewport, 0, 0, m_FBO_WIDTH, m_FBO_HEIGHT);
 }
 
-void WaterEffect::bind_default_fbo(unsigned int screen_width, unsigned int screen_height) {
+void WaterEffect::bind_default_fbo(unsigned int buffer_width, unsigned int buffer_height) {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
-    CHECKED_GL_CALL(glViewport, 0, 0, screen_width, screen_height);
+    CHECKED_GL_CALL(glViewport, 0, 0, buffer_width, buffer_height);
 }
 
 void WaterEffect::enable_clip_distance() { CHECKED_GL_CALL(glEnable, GL_CLIP_DISTANCE0); }
