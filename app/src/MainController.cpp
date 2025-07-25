@@ -40,7 +40,8 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
 }
 
 void MainPlatformEventObserver::on_window_resize(int width, int height) {
-    // need to put glViewport(0, 0, width, height);
+    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+    graphics->viewport(width, height);
 }
 
 void MainController::initialize() {
