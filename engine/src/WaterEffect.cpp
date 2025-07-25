@@ -7,12 +7,12 @@
 #include <spdlog/spdlog.h>
 
 void WaterEffect::init() {
-    CHECKED_GL_CALL(glGenFramebuffers, 1, &m_FBO);
-    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_FBO);
+    CHECKED_GL_CALL(glGenFramebuffers, 1, &m_fbo);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_fbo);
 
     CHECKED_GL_CALL(glGenTextures, 1, &m_color_buffer);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffer);
-    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, m_FBO_WIDTH, m_FBO_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, m_fbo_width, m_fbo_height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     CHECKED_GL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -21,7 +21,7 @@ void WaterEffect::init() {
     unsigned int rbo_depth;
     CHECKED_GL_CALL(glGenRenderbuffers, 1, &rbo_depth);
     CHECKED_GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, rbo_depth);
-    CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_FBO_WIDTH, m_FBO_HEIGHT);
+    CHECKED_GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_fbo_width, m_fbo_height);
     CHECKED_GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_depth);
 
     if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
@@ -30,8 +30,8 @@ void WaterEffect::init() {
 }
 
 void WaterEffect::bind_reflection_fbo() {
-    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_FBO);
-    CHECKED_GL_CALL(glViewport, 0, 0, m_FBO_WIDTH, m_FBO_HEIGHT);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_fbo);
+    CHECKED_GL_CALL(glViewport, 0, 0, m_fbo_width, m_fbo_height);
 }
 
 void WaterEffect::bind_default_fbo(unsigned int buffer_width, unsigned int buffer_height) {
@@ -56,7 +56,7 @@ void WaterEffect::active_dudv_map(unsigned int texture_id) {
 void WaterEffect::active_texture0() { CHECKED_GL_CALL(glActiveTexture, GL_TEXTURE0); }
 
 void WaterEffect::draw_water() {
-    if (m_water_VAO == 0) {
+    if (m_water_vao == 0) {
         float water_vertices[] = {
                 // positions          // normals           // texCoords
                 5.0f, 0.0f, 5.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
@@ -70,10 +70,10 @@ void WaterEffect::draw_water() {
 
 
         // setup water VAO
-        CHECKED_GL_CALL(glGenVertexArrays, 1, &m_water_VAO);
-        CHECKED_GL_CALL(glGenBuffers, 1, &m_water_VBO);
-        CHECKED_GL_CALL(glBindVertexArray, m_water_VAO);
-        CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_water_VBO);
+        CHECKED_GL_CALL(glGenVertexArrays, 1, &m_water_vao);
+        CHECKED_GL_CALL(glGenBuffers, 1, &m_water_vbo);
+        CHECKED_GL_CALL(glBindVertexArray, m_water_vao);
+        CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_water_vbo);
         CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(water_vertices), &water_vertices, GL_STATIC_DRAW);
         CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
         CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
@@ -85,7 +85,7 @@ void WaterEffect::draw_water() {
                         (void *) (6 * sizeof(float)));
     }
 
-    CHECKED_GL_CALL(glBindVertexArray, m_water_VAO);
+    CHECKED_GL_CALL(glBindVertexArray, m_water_vao);
     CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6);
     CHECKED_GL_CALL(glBindVertexArray, 0);
 }

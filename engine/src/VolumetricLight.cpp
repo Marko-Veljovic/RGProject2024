@@ -6,8 +6,8 @@
 
 void VolumetricLight::init(unsigned int buffer_width, unsigned int buffer_height) {
     // hdr_FBO
-    CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_FBO);
-    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
+    CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_fbo);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
 
     CHECKED_GL_CALL(glGenTextures, 1, &m_color_buffer);
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_color_buffer);
@@ -32,7 +32,7 @@ void VolumetricLight::init(unsigned int buffer_width, unsigned int buffer_height
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
-void VolumetricLight::bind_hdr_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO); }
+void VolumetricLight::bind_hdr_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo); }
 
 void VolumetricLight::clear_color_depth_buffers() { CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 

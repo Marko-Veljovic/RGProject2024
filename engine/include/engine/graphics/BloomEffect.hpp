@@ -3,14 +3,14 @@
 
 class BloomEffect {
 private:
-    unsigned int m_hdr_FBO;
+    unsigned int m_hdr_fbo;
     unsigned int m_color_buffers[3];
 
-    unsigned int m_ping_pong_FBO[4];
+    unsigned int m_ping_pong_fbo[4];
     unsigned int m_ping_pong_color_buffers[4];
 
-    unsigned int m_quad_VAO = 0;
-    unsigned int m_quad_VBO;
+    unsigned int m_quad_vao = 0;
+    unsigned int m_quad_vbo;
 
 public:
     void init(unsigned int buffer_width, unsigned int buffer_height);

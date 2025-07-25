@@ -7,8 +7,8 @@
 
 void BloomEffect::init(unsigned int buffer_width, unsigned int buffer_height) {
     // hdr_FBO
-    CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_FBO);
-    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO);
+    CHECKED_GL_CALL(glGenFramebuffers, 1, &m_hdr_fbo);
+    CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo);
 
     // 3 color buffers for: 1) scene, 2) bright fragments only, 3) lighthouse light only
     CHECKED_GL_CALL(glGenTextures, 3, m_color_buffers);
@@ -37,10 +37,10 @@ void BloomEffect::init(unsigned int buffer_width, unsigned int buffer_height) {
     if (CHECKED_GL_CALL(glCheckFramebufferStatus, GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) spdlog::error("ERROR::FRAMEBUFFER:: Framebuffer is not complete!");
 
     // 4 ping_pong_FBOs for blurring, 2 for blurring bright color buffer (bloom effect) and 2 for blurring lighthouse light (volumetric light)
-    CHECKED_GL_CALL(glGenFramebuffers, 4, m_ping_pong_FBO);
+    CHECKED_GL_CALL(glGenFramebuffers, 4, m_ping_pong_fbo);
     CHECKED_GL_CALL(glGenTextures, 4, m_ping_pong_color_buffers);
     for (unsigned int i = 0; i < 4; i++) {
-        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[i]);
+        CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_fbo[i]);
         CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D, m_ping_pong_color_buffers[i]);
         CHECKED_GL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGBA16F, buffer_width, buffer_height, 0, GL_RGBA, GL_FLOAT,
                         nullptr);
@@ -58,11 +58,11 @@ void BloomEffect::init(unsigned int buffer_width, unsigned int buffer_height) {
     CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 }
 
-void BloomEffect::bind_hdr_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_FBO); }
+void BloomEffect::bind_hdr_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo); }
 
-void BloomEffect::bind_ping_pong_fbo(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[horizontal]); }
+void BloomEffect::bind_ping_pong_fbo(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_fbo[horizontal]); }
 
-void BloomEffect::bind_ping_pong_fbo2(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_FBO[2 + horizontal]); }
+void BloomEffect::bind_ping_pong_fbo2(bool horizontal) { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_ping_pong_fbo[2 + horizontal]); }
 
 void BloomEffect::bind_ping_pong_texture(bool first_iteration, bool horizontal) {
     CHECKED_GL_CALL(glBindTexture, GL_TEXTURE_2D,
@@ -91,7 +91,7 @@ void BloomEffect::active_volumetric_texture(bool horizontal) {
 }
 
 void BloomEffect::render_quad() {
-    if (m_quad_VAO == 0) {
+    if (m_quad_vao == 0) {
         float quad_vertices[] = {
                 // positions        // texture Coords
                 -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -100,10 +100,10 @@ void BloomEffect::render_quad() {
                 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
         };
         // setup quad VAO
-        CHECKED_GL_CALL(glGenVertexArrays, 1, &m_quad_VAO);
-        CHECKED_GL_CALL(glGenBuffers, 1, &m_quad_VBO);
-        CHECKED_GL_CALL(glBindVertexArray, m_quad_VAO);
-        CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_quad_VBO);
+        CHECKED_GL_CALL(glGenVertexArrays, 1, &m_quad_vao);
+        CHECKED_GL_CALL(glGenBuffers, 1, &m_quad_vbo);
+        CHECKED_GL_CALL(glBindVertexArray, m_quad_vao);
+        CHECKED_GL_CALL(glBindBuffer, GL_ARRAY_BUFFER, m_quad_vbo);
         CHECKED_GL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(quad_vertices), &quad_vertices, GL_STATIC_DRAW);
         CHECKED_GL_CALL(glEnableVertexAttribArray, 0);
         CHECKED_GL_CALL(glVertexAttribPointer, 0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
@@ -112,7 +112,7 @@ void BloomEffect::render_quad() {
                         (void *) (3 * sizeof(float)));
     }
 
-    CHECKED_GL_CALL(glBindVertexArray, m_quad_VAO);
+    CHECKED_GL_CALL(glBindVertexArray, m_quad_vao);
     CHECKED_GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
     CHECKED_GL_CALL(glBindVertexArray, 0);
 }

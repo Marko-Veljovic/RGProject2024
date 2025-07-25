@@ -3,14 +3,14 @@
 
 class WaterEffect {
 private:
-    unsigned int m_FBO;
+    unsigned int m_fbo;
     unsigned int m_color_buffer;
 
-    unsigned const int m_FBO_WIDTH  = 320;
-    unsigned const int m_FBO_HEIGHT = 180;
+    unsigned const int m_fbo_width  = 320;
+    unsigned const int m_fbo_height = 180;
 
-    unsigned int m_water_VAO = 0;
-    unsigned int m_water_VBO;
+    unsigned int m_water_vao = 0;
+    unsigned int m_water_vbo;
 
 public:
     void init();

@@ -2,7 +2,7 @@
 #define VOLUMETRICLIGHT_HPP
 
 class VolumetricLight {
-    unsigned int m_hdr_FBO;
+    unsigned int m_hdr_fbo;
 
     unsigned int m_color_buffer;
 
