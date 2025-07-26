@@ -22,7 +22,6 @@ void GuiController::draw() {
 
     ImGui::Begin("Camera info");
     ImGui::Text("Camera position: (%f, %f, %f)", camera->Position.x, camera->Position.y, camera->Position.z);
-    ImGui::SliderFloat3("Island position: ", program_state->m_island_position, -1.0f, 1.0f);
     ImGui::DragFloat("Exposure", &program_state->m_exposure, 0.01, 0.0, 1.0);
     ImGui::Checkbox("Bloom:", &program_state->m_bloom_enabled);
     ImGui::End();

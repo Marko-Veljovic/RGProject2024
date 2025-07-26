@@ -10,8 +10,6 @@ public:
 
     bool m_bloom_enabled = true;
 
-    float m_island_position[3];
-
     std::string_view name() const override { return "app::ProgramStateController"; }
 };
 
