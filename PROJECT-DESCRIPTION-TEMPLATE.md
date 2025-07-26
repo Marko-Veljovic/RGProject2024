@@ -1,21 +1,25 @@
-# {NAME-OF-THE-PROJECT}
+# The Lighthouse island
 
-{INDEX} - {STUDENT-FULL-NAME}  
-{PROJECT DESCRIPTION}
+mi22017 - Marko Veljović  
+This project is an implementation of the bloom effect, volumetric scattering  
+as a post-process and water rendering combined with basic OpenGL.
 
 ## Controls
 
-{BUTTON1} -> {ACTION1}  
-{BUTTON2} -> {ACTION2}  
-...  
-{BUTTONN} -> {ACTIONN}
+W -> Move forward  
+A -> Move left  
+S -> Move backwards  
+D -> Move right  
+Mouse Scroll -> Zoom  
+F2 -> Open/Close GUI  
+ESC -> Close application
 
 ## Features
 
 ### Fundamental:
 
-[ ] Model with lighting
-[ ] Two types of lighting with customizable colors and movement through GUI or ACTIONS
+[ ] Model with lighting  
+[ ] Two types of lighting with customizable colors and movement through GUI or ACTIONS  
 [ ] {ACTION_X} --- AFTER_M_SECONDS---Triggers---> {EVENT_A} ---> AFTER_N_SECONDS---Triggers---> {EVENT_B}
 
 ### Group A:
@@ -26,6 +30,7 @@
 [ ] Parallax Mapping
 
 ### Group B:
+
 [ ] Bloom with the use of HDR  
 [ ] Deferred Shading  
 [ ] Point Shadows  
@@ -37,12 +42,9 @@
 
 ## Models:
 
-[link1]   
-[link2]
+"Floating island" (https://sketchfab.com/3d-models/floating-island-192393b07d5d4e06a27e9ffc68ac5d89) by
+Una.K.C (https://sketchfab.com/Una.K.C) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
 
 ## Textures
 
-[link1]  
-[link2]
-
-{OTHER-RESOURCES}
+https://www.dropbox.com/scl/fi/zvy1oazq9755a2j0w2ac7/waterDUDV.png?rlkey=ya6t0vowkinlwc2e61v4dl4se&e=1&dl=0  
