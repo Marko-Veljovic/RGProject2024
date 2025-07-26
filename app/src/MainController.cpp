@@ -42,6 +42,9 @@ void MainPlatformEventObserver::on_scroll(engine::platform::MousePosition positi
 void MainPlatformEventObserver::on_window_resize(int width, int height) {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     graphics->viewport(width, height);
+
+    auto main_controller = engine::core::Controller::get<app::MainController>();
+    main_controller->resize_effects(width, height);
 }
 
 void MainController::initialize() {
@@ -90,6 +93,11 @@ void MainController::initialize() {
     water_shader->set_int("dudvMap", 1);
 }
 
+void MainController::resize_effects(int width, int height) {
+    m_bloom_effect->resize(width, height);
+    m_volumetric_light->resize(width, height);
+}
+
 bool MainController::loop() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     if (platform->key(engine::platform::KeyId::KEY_ESCAPE).is_down()) { return false; }
@@ -98,11 +106,11 @@ bool MainController::loop() {
 
 void MainController::draw_lighthouse() {
     // Model
-    auto resource = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    engine::resources::Model *lighthouse = resource->model("lighthouse");
+    engine::resources::Model *lighthouse = resources->model("lighthouse");
     // Shader
-    engine::resources::Shader *shader = resource->shader("basic");
+    engine::resources::Shader *shader = resources->shader("basic");
 
     shader->use();
     shader->set_mat4("projection", graphics->projection_matrix());
@@ -145,14 +153,14 @@ void MainController::draw_lighthouse() {
 
 void MainController::draw_reflector() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    auto shader = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("lightCube");
-    auto volumetric_light_shader = engine::core::Controller::get<engine::resources::ResourcesController>()->
-            shader("volumetricLight");
-    auto reflector = engine::core::Controller::get<engine::resources::ResourcesController>()->model("cube");
+    auto resources = engine::core::Controller::get<engine::resources::ResourcesController>();
+    auto shader = resources->shader("lightCube");
+    auto volumetric_light_shader = resources->shader("volumetricLight");
+    auto reflector = resources->model("cube");
     shader->use();
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, m_lighthouse_y + 2.67f, -3.0f));// lightCube position
+    model = glm::translate(model, glm::vec3(0.0f, m_lighthouse_y + 2.67f, -3.0f));
     model = glm::scale(model, glm::vec3(0.1f));
     glm::mat4 projection = graphics->projection_matrix();
     glm::mat4 view = graphics->camera()->view_matrix();
@@ -172,7 +180,6 @@ void MainController::draw_reflector() {
 }
 
 void MainController::prepare_reflection_texture() {
-    auto resource = engine::core::Controller::get<engine::resources::ResourcesController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto platform = engine::platform::PlatformController::get<engine::platform::PlatformController>();
     auto camera = graphics->camera();
@@ -210,7 +217,6 @@ void MainController::draw_water() {
 
     float water_height = 0.0f;
 
-    // Shader
     engine::resources::Shader *shader = resource->shader("water");
 
     shader->use();
@@ -263,7 +269,6 @@ void MainController::draw_island() {
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
     auto shader = engine::core::Controller::get<engine::resources::ResourcesController>()->shader("basic");
     auto island = engine::core::Controller::get<engine::resources::ResourcesController>()->model("island");
-    auto program_state = engine::core::Controller::get<ProgramStateController>();
     shader->use();
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -280,12 +285,8 @@ void MainController::draw_island() {
 }
 
 void MainController::update_camera() {
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     auto gui_controller = engine::core::Controller::get<GuiController>();
-    if (gui_controller->is_enabled()) {
-        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        return;
-    }
+    if (gui_controller->is_enabled()) { return; }
 
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
     auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();

@@ -4,6 +4,7 @@
 class BloomEffect {
 private:
     unsigned int m_hdr_fbo;
+    unsigned int m_rbo_depth;
     unsigned int m_color_buffers[3];
 
     unsigned int m_ping_pong_fbo[4];
@@ -14,6 +15,8 @@ private:
 
 public:
     void init(unsigned int buffer_width, unsigned int buffer_height);
+
+    void resize(unsigned int width, unsigned int height);
 
     void bind_hdr_fbo();
 

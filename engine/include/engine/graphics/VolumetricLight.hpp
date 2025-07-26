@@ -11,6 +11,8 @@ class VolumetricLight {
 public:
     void init(unsigned int buffer_width, unsigned int buffer_height);
 
+    void resize(unsigned int width, unsigned int height);
+
     void bind_hdr_fbo();
 
     void clear_color_depth_buffers();

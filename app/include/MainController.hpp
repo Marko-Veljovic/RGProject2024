@@ -41,6 +41,8 @@ class MainController : public engine::core::Controller {
 
 public:
     std::string_view name() const override { return "app::MainController"; }
+
+    void resize_effects(int width, int height);
 };
 
 }// app
