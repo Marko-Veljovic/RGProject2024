@@ -364,8 +364,8 @@ void MainController::draw() {
     m_bloom_effect->render_quad();
 
     // Volumetric light
-    m_bloom_effect->bind_default_fbo();
-    m_bloom_effect->clear_color_depth_buffers();
+    m_volumetric_light->bind_default_fbo();
+    m_volumetric_light->clear_color_depth_buffers();
     volumetric_light_shader->use();
     volumetric_light_shader->set_float("exposure", program_state->m_exposure);
     m_volumetric_light->finalize();

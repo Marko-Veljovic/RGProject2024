@@ -15,6 +15,8 @@ public:
 
     void bind_hdr_fbo();
 
+    void bind_default_fbo();
+
     void clear_color_depth_buffers();
 
     void finalize();

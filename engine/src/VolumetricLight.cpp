@@ -46,6 +46,8 @@ void VolumetricLight::resize(unsigned int width, unsigned int height) {
 
 void VolumetricLight::bind_hdr_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, m_hdr_fbo); }
 
+void VolumetricLight::bind_default_fbo() { CHECKED_GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0); }
+
 void VolumetricLight::clear_color_depth_buffers() { CHECKED_GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
 void VolumetricLight::finalize() {
