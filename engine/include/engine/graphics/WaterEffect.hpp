@@ -6,8 +6,8 @@ private:
     unsigned int m_fbo;
     unsigned int m_color_buffer;
 
-    unsigned const int m_fbo_width  = 320;
-    unsigned const int m_fbo_height = 180;
+    unsigned const int m_fbo_width  = 640;
+    unsigned const int m_fbo_height = 360;
 
     unsigned int m_water_vao = 0;
     unsigned int m_water_vbo;

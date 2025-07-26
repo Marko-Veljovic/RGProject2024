@@ -16,7 +16,7 @@ uniform mat4 projection;
 
 uniform vec4 plane;
 
-const float tiling = 6.0;
+const float tiling = 200.0;
 
 void main()
 {
@@ -69,7 +69,7 @@ uniform sampler2D reflectionTexture;
 uniform sampler2D dudvMap;
 uniform float moveFactor;
 
-const float waveStrength = 0.02;
+const float waveStrength = 0.01;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 reflectionTextureColor);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 reflectionTextureColor);
