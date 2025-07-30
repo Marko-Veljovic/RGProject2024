@@ -1,11 +1,23 @@
 {
   "resources": {
     "models": {
+      "backpack": {
+        "path": "backpack/backpack.obj"
+      },
+      "lighthouse": {
+        "path": "lighthouse/lighthouse.obj"
+      },
+      "cube": {
+        "path": "cube/cube.fbx"
+      },
+      "island": {
+        "path": "floating_island/scene.gltf"
+      }
     }
   },
   "window": {
-    "height": 600,
-    "title": "Hello, window!",
-    "width": 800
+    "height": 1000,
+    "title": "The Lighthouse island",
+    "width": 1800
   }
 }
